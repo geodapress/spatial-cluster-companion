@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Distance Preserving Methods – The Python Companion to Spatial Cluster Analysis with GeoDa</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./hierarchical_clustering.html" rel="next">
+<link href="./PCA.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./MDS.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">The Python Companion to Spatial Cluster Analysis with GeoDa</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Creating_maps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating Thematic Maps</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Multivariate_local.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Multivariate Local Spatial Clusters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Density_cluster.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./PCA.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./MDS.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hierarchical Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmeans.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Partitioning Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmedoids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Advanced Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spectral_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Spectral Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatializing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatializing Classic Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Hierarchical Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./partitioned_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Partitioning Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Cluster Validation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bibliography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preliminaries" id="toc-preliminaries" class="nav-link active" data-scroll-target="#preliminaries"><span class="header-section-number">6.1</span> Preliminaries</a>
+  <ul class="collapse">
+  <li><a href="#import-required-modules" id="toc-import-required-modules" class="nav-link" data-scroll-target="#import-required-modules"><span class="header-section-number">6.1.1</span> Import Required Modules</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data"><span class="header-section-number">6.1.2</span> Load Data</a></li>
+  <li><a href="#variables" id="toc-variables" class="nav-link" data-scroll-target="#variables"><span class="header-section-number">6.1.3</span> Variables</a></li>
+  </ul></li>
+  <li><a href="#classic-mds" id="toc-classic-mds" class="nav-link" data-scroll-target="#classic-mds"><span class="header-section-number">6.2</span> Classic MDS</a>
+  <ul class="collapse">
+  <li><a href="#gramm-matrix" id="toc-gramm-matrix" class="nav-link" data-scroll-target="#gramm-matrix"><span class="header-section-number">6.2.1</span> Gramm Matrix</a></li>
+  <li><a href="#eigendecomposition" id="toc-eigendecomposition" class="nav-link" data-scroll-target="#eigendecomposition"><span class="header-section-number">6.2.2</span> Eigendecomposition</a></li>
+  <li><a href="#mds-dimensions" id="toc-mds-dimensions" class="nav-link" data-scroll-target="#mds-dimensions"><span class="header-section-number">6.2.3</span> MDS Dimensions</a></li>
+  <li><a href="#characteristics-of-the-mds-solution" id="toc-characteristics-of-the-mds-solution" class="nav-link" data-scroll-target="#characteristics-of-the-mds-solution"><span class="header-section-number">6.2.4</span> Characteristics of the MDS Solution</a></li>
+  <li><a href="#sec-vizmds" id="toc-sec-vizmds" class="nav-link" data-scroll-target="#sec-vizmds"><span class="header-section-number">6.2.5</span> Visualizing MDS Results</a></li>
+  </ul></li>
+  <li><a href="#classic-mds-and-pca" id="toc-classic-mds-and-pca" class="nav-link" data-scroll-target="#classic-mds-and-pca"><span class="header-section-number">6.3</span> Classic MDS and PCA</a>
+  <ul class="collapse">
+  <li><a href="#sec-classpcaviz" id="toc-sec-classpcaviz" class="nav-link" data-scroll-target="#sec-classpcaviz"><span class="header-section-number">6.3.1</span> Comparing Two Dimensions</a></li>
+  <li><a href="#sec-classpcavizfirst" id="toc-sec-classpcavizfirst" class="nav-link" data-scroll-target="#sec-classpcavizfirst"><span class="header-section-number">6.3.2</span> Comparing the First Dimension</a></li>
+  </ul></li>
+  <li><a href="#mds-analysis-with-scikit-learn" id="toc-mds-analysis-with-scikit-learn" class="nav-link" data-scroll-target="#mds-analysis-with-scikit-learn"><span class="header-section-number">6.4</span> MDS Analysis With Scikit-Learn</a>
+  <ul class="collapse">
+  <li><a href="#smacof" id="toc-smacof" class="nav-link" data-scroll-target="#smacof"><span class="header-section-number">6.4.1</span> SMACOF</a></li>
+  <li><a href="#visualizing-mds-smacof" id="toc-visualizing-mds-smacof" class="nav-link" data-scroll-target="#visualizing-mds-smacof"><span class="header-section-number">6.4.2</span> Visualizing MDS (SMACOF)</a></li>
+  <li><a href="#measures-of-fit" id="toc-measures-of-fit" class="nav-link" data-scroll-target="#measures-of-fit"><span class="header-section-number">6.4.3</span> Measures of Fit</a></li>
+  </ul></li>
+  <li><a href="#smacof-vs-classic-mds" id="toc-smacof-vs-classic-mds" class="nav-link" data-scroll-target="#smacof-vs-classic-mds"><span class="header-section-number">6.5</span> SMACOF vs classic MDS</a>
+  <ul class="collapse">
+  <li><a href="#comparing-two-dimensions" id="toc-comparing-two-dimensions" class="nav-link" data-scroll-target="#comparing-two-dimensions"><span class="header-section-number">6.5.1</span> Comparing Two Dimensions</a></li>
+  <li><a href="#comparing-the-first-dimension" id="toc-comparing-the-first-dimension" class="nav-link" data-scroll-target="#comparing-the-first-dimension"><span class="header-section-number">6.5.2</span> Comparing the First Dimension</a></li>
+  </ul></li>
+  <li><a href="#spatializing-mds" id="toc-spatializing-mds" class="nav-link" data-scroll-target="#spatializing-mds"><span class="header-section-number">6.6</span> Spatializing MDS</a>
+  <ul class="collapse">
+  <li><a href="#neighbor-match-test" id="toc-neighbor-match-test" class="nav-link" data-scroll-target="#neighbor-match-test"><span class="header-section-number">6.6.1</span> Neighbor Match Test</a></li>
+  <li><a href="#hdbscan" id="toc-hdbscan" class="nav-link" data-scroll-target="#hdbscan"><span class="header-section-number">6.6.2</span> HDBScan</a></li>
+  <li><a href="#common-coverage-percentage" id="toc-common-coverage-percentage" class="nav-link" data-scroll-target="#common-coverage-percentage"><span class="header-section-number">6.6.3</span> Common Coverage Percentage</a></li>
+  </ul></li>
+  <li><a href="#stochastic-neighbor-embedding-sne" id="toc-stochastic-neighbor-embedding-sne" class="nav-link" data-scroll-target="#stochastic-neighbor-embedding-sne"><span class="header-section-number">6.7</span> Stochastic Neighbor Embedding (SNE)</a>
+  <ul class="collapse">
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation"><span class="header-section-number">6.7.1</span> Implementation</a></li>
+  <li><a href="#solution-characteristics" id="toc-solution-characteristics" class="nav-link" data-scroll-target="#solution-characteristics"><span class="header-section-number">6.7.2</span> Solution characteristics</a></li>
+  <li><a href="#spatializing-t-sne" id="toc-spatializing-t-sne" class="nav-link" data-scroll-target="#spatializing-t-sne"><span class="header-section-number">6.7.3</span> Spatializing t-SNE</a></li>
+  </ul></li>
+  <li><a href="#practice" id="toc-practice" class="nav-link" data-scroll-target="#practice"><span class="header-section-number">6.8</span> Practice</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this Chapter, we consider a second class of dimension reduction techniques, based on the preservation of relative distances in high-dimensional attribute space. We cover two different approaches: <em>multi-dimensional scaling</em> (MDS) and <em>stochastic neighbor embedding</em> (SNE). Whereas MDS uses the actual multi-attribute distance between pairs of observations, SNE is based on information-theoretic concepts of the similarity between probability distributions as the criterion for embedding. The two sets of techniques are covered in Chapters 3 and 4 of the <em>GeoDa Cluster Book</em>.</p>
+<p>We continue with the <strong>italy_banks</strong> sample data for the empirical illustration.</p>
+<p>In addition to the usual <code>numpy</code>, <code>pandas</code>, <code>geopandas</code> and <code>matplotlib.pyplot</code>, we also import several specialized packages from scikit-learn. Specifically, to carry out variable standardization we import <code>StandardScaler</code> from <code>sklearn.preprocessing</code>, and to compute the distance matrix we need <code>pairwise_distances</code> from <code>sklearn.metrics</code>. The specific methods are <code>MDS</code> and <code>TSNE</code> from <code>sklearn.manifold</code>, and, as used before, <code>PCA</code> from <code>sklearn.decomposition</code> and <code>HDBSCAN</code> from <code>sklearn.cluster</code>. To characterize the results, we use several helper functions from <code>spatial-cluster-helper</code>, namely <code>ensure_datasets</code>, <code>cluster_stats</code>, <code>stress_value</code>, <code>distcorr</code> and <code>common_coverage</code>. We implement some of the <em>spatialization</em> of these methods employing <code>KNN</code> and <code>w_intersection</code> from <code>libpysal.weights</code> as well as the local spatial autocorrelation functionality from <code>pygeoda</code>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Packages">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Packages
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>numpy, pandas, geopandas, matplotlib.pyplot, sklearn.decomposition, sklearn.preprocessing, sklearn.manifold, sklearn.metrics, sklearn.cluster, spatial-cluster-helper, libpysal, pygeoda</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Data Sets">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Data Sets
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>italy_banks</p>
+</div>
+</div>
+<section id="preliminaries" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="preliminaries"><span class="header-section-number">6.1</span> Preliminaries</h2>
+<section id="import-required-modules" class="level3" data-number="6.1.1">
+<h3 data-number="6.1.1" class="anchored" data-anchor-id="import-required-modules"><span class="header-section-number">6.1.1</span> Import Required Modules</h3>
+<div id="e49b893f" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> pairwise_distances</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.manifold <span class="im">import</span> MDS, TSNE</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> HDBSCAN</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> libpysal.weights <span class="im">import</span> KNN, w_intersection</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spatial_cluster_helper <span class="im">import</span> ensure_datasets, cluster_stats, <span class="op">\</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>     stress_value, distcorr, common_coverage</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pygeoda </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="load-data" class="level3" data-number="6.1.2">
+<h3 data-number="6.1.2" class="anchored" data-anchor-id="load-data"><span class="header-section-number">6.1.2</span> Load Data</h3>
+<p>We follow the usual practice of setting a path (if needed), and read the data from the Italian banks shape file (<code>italy_banks.shp</code>). We also carry out a quick check.</p>
+<div id="a2bd865b" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setting data folder:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#path = "/your/path/to/data/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> <span class="st">"./datasets/"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the Italy community banks point data:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>shpfile <span class="op">=</span> <span class="st">"italy_banks/italy_banks.shp"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ensure_datasets(shpfile, folder_path <span class="op">=</span> path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> gpd.read_file(path <span class="op">+</span> shpfile)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.shape)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.head(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(261, 102)
+   idd                                           BankName    City    latitud  \
+0  1.0  Banca di Andria di Credito Cooperativo SocietÃ...  ANDRIA  41.226694   
+1  8.0  Banca di Credito Cooperativo di Napoli-BCC di ...  NAPLES  40.841020   
+2  9.0  Banca Adria Credito Cooperativo del Delta s.c....   ADRIA  45.052882   
+
+    longitud       COORD_X          XKM       COORD_Y          YKM   ID  ...  \
+0  16.302685  1.112303e+06  1112.303366  4.589794e+06  4589.793823  1.0  ...   
+1  14.250822  9.427720e+05   942.771983  4.534476e+06  4534.475758  8.0  ...   
+2  12.056720  7.407057e+05   740.705695  4.993464e+06  4993.464408  9.0  ...   
+
+    EXPE_16   EXPE_17   SERV_11   SERV_12   SERV_13   SERV_14   SERV_15  \
+0  0.027966  0.025114  0.793877  0.775691  0.745046  0.630469  0.611941   
+1  0.023624  0.018840  0.770019  0.562623  0.540712  0.522125  0.601549   
+2  0.013770  0.012745  0.790542  0.626628  0.515733  0.358735  0.483700   
+
+    SERV_16   SERV_17                         geometry  
+0  0.640208  0.666425  POINT (1112303.366 4589793.823)  
+1  0.502599  0.625220   POINT (942771.983 4534475.758)  
+2  0.567946  0.608880   POINT (740705.695 4993464.408)  
+
+[3 rows x 102 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="variables" class="level3" data-number="6.1.3">
+<h3 data-number="6.1.3" class="anchored" data-anchor-id="variables"><span class="header-section-number">6.1.3</span> Variables</h3>
+<p>We continue to use the same selection of bank performance indicators for 2013 as in <a href="PCA.html" class="quarto-xref">Chapter&nbsp;<span>5</span></a>. For completeness sake we list them here as well:</p>
+<div id="tbl-variables-mds" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-variables-mds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: MDS Variables
+</figcaption>
+<div aria-describedby="tbl-variables-mds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 86%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Column Name</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CAPRAT</td>
+<td style="text-align: left;">Ratio of capital over risk weighted assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Z</td>
+<td style="text-align: left;">Z score of return on assets (ROA) + leverage over the standard deviation of ROA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LIQASS</td>
+<td style="text-align: left;">Ratio of liquid assets over total assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NPL</td>
+<td style="text-align: left;">Ratio of non-performing loans over total loans</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LLP</td>
+<td style="text-align: left;">Ratio of loan loss provision over customer loans</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">INTR</td>
+<td style="text-align: left;">Ratio of interest expense over total funds</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DEPO</td>
+<td style="text-align: left;">Ratio of total deposits over total assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EQLN</td>
+<td style="text-align: left;">Ratio of total equity over customer loans</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EXPE</td>
+<td style="text-align: left;">Ratio of operating expenses over total assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">SERV</td>
+<td style="text-align: left;">Net interest income over operating revenues</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>We specify <code>varlist</code> as a list with the respective variables names.</p>
+<div id="0c80cbfe" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>varlist <span class="op">=</span> [<span class="st">'CAPRAT13'</span>, <span class="st">'Z_13'</span>, <span class="st">'LIQASS_13'</span>, <span class="st">'NPL_13'</span>, <span class="st">'LLP_13'</span>, </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                <span class="st">'INTR_13'</span>, <span class="st">'DEPO_13'</span>, <span class="st">'EQLN_13'</span>, <span class="st">'EXPE_13'</span>, <span class="st">'SERV_13'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We also create a subset of the original GeoDataFrame with just the selected variables, as <code>data_mds</code>.</p>
+<div id="21ec3a2c" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_mds <span class="op">=</span> dfs[varlist]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="classic-mds" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="classic-mds"><span class="header-section-number">6.2</span> Classic MDS</h2>
+<p>Classic MDS is based on the Gramm matrix <span class="math inline">\(XX'\)</span> when the full data set is available (as is the case here). Alternatively, it can also be computed directly from a double-centered squared distance matrix, which is useful when that is the only information available (i.e., no full set of observations <span class="math inline">\(X\)</span>):</p>
+<p><span class="math inline">\(XX' = - (1/2)(I - M)D^2(I - M),\)</span></p>
+<p>where <span class="math inline">\(D\)</span> is the matrix of pairwise distances, and <span class="math inline">\(M\)</span> is a matrix consisting of elements <span class="math inline">\(1 / n\)</span>. The result of the <span class="math inline">\((I - M)\)</span> operation is to compute values as deviations from the mean. Pre- and post-multiplying the squared distance matrix with <span class="math inline">\((I - M)\)</span> is referred to as <em>double centering</em>.</p>
+<section id="gramm-matrix" class="level3" data-number="6.2.1">
+<h3 data-number="6.2.1" class="anchored" data-anchor-id="gramm-matrix"><span class="header-section-number">6.2.1</span> Gramm Matrix</h3>
+<p>We start by comparing the Gramm matrix and the double centered squared distance matrix. As before, we first standardize the variables using <code>StandardScaler</code>, to which we apply <code>fit_transform</code> with the original data <code>data_mds</code> as argument. In the example below, the matrix <span class="math inline">\((I - M)\)</span> is used as <span class="math inline">\(H\)</span>.</p>
+<div id="8c390ce8" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-processing: standardize the data</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> StandardScaler().fit_transform(data_mds)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute pairwise distances</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>dist_matrix <span class="op">=</span> pairwise_distances(X)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Double-center the distance matrix</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> dist_matrix.shape[<span class="dv">0</span>]</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Matrix I - M</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>H <span class="op">=</span> np.eye(n_samples) <span class="op">-</span> np.ones((n_samples, n_samples)) <span class="op">/</span> n_samples</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> <span class="op">-</span><span class="fl">0.5</span> <span class="op">*</span> H <span class="op">@</span> (dist_matrix <span class="op">**</span> <span class="dv">2</span>) <span class="op">@</span> H</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare to XX</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>XXp <span class="op">=</span> X <span class="op">@</span> X.T</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"B:</span><span class="ch">\n</span><span class="st">"</span>, B[<span class="dv">0</span>:<span class="dv">5</span>,<span class="dv">0</span>:<span class="dv">5</span>])</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"XXp:</span><span class="ch">\n</span><span class="st">"</span>, XXp[<span class="dv">0</span>:<span class="dv">5</span>,<span class="dv">0</span>:<span class="dv">5</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>B:
+ [[ 2.07700836e+01  1.19850381e+01 -3.04437191e-01 -4.46754435e+00
+  -6.75815062e+00]
+ [ 1.19850381e+01  1.71772980e+01  4.22260221e+00 -1.76067198e-02
+  -1.91990000e+00]
+ [-3.04437191e-01  4.22260221e+00  7.49594112e+00  4.04560929e+00
+   4.20339927e+00]
+ [-4.46754435e+00 -1.76067198e-02  4.04560929e+00  7.39569901e+00
+   5.11760413e+00]
+ [-6.75815062e+00 -1.91990000e+00  4.20339927e+00  5.11760413e+00
+   6.73823232e+00]]
+XXp:
+ [[ 2.07700836e+01  1.19850381e+01 -3.04437191e-01 -4.46754435e+00
+  -6.75815062e+00]
+ [ 1.19850381e+01  1.71772980e+01  4.22260221e+00 -1.76067198e-02
+  -1.91990000e+00]
+ [-3.04437191e-01  4.22260221e+00  7.49594112e+00  4.04560929e+00
+   4.20339927e+00]
+ [-4.46754435e+00 -1.76067198e-02  4.04560929e+00  7.39569901e+00
+   5.11760413e+00]
+ [-6.75815062e+00 -1.91990000e+00  4.20339927e+00  5.11760413e+00
+   6.73823232e+00]]</code></pre>
+</div>
+</div>
+<p>Clearly, it doesn’t matter whether we use the Gramm matrix or the double centered squared distance matrix. In our example, since we have the full matrix <span class="math inline">\(X\)</span>, we will use the Gramm matrix to compute the eigenvalues and eigenvectors.</p>
+</section>
+<section id="eigendecomposition" class="level3" data-number="6.2.2">
+<h3 data-number="6.2.2" class="anchored" data-anchor-id="eigendecomposition"><span class="header-section-number">6.2.2</span> Eigendecomposition</h3>
+<p>In classic MDS, the coordinates of the observations in two dimensions are obtained from the eigenvalues and eigenvectors of the Gramm Matrix. To compute these, we use the <code>eigh</code> function from <code>numpy.linalg</code> because we know that <span class="math inline">\(XX'\)</span> is real and symmetric. Note that the eigenvalues are not necessarily in any given order, so that we need to apply <code>argsort</code> to get them in decreasing order (the ordering given by <code>argsort</code> is always in increasing order, hence the additional argument <code>[::-1]</code>).</p>
+<div id="2d125c1a" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Eigendecomposition</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>eigvals, eigvecs <span class="op">=</span> np.linalg.eigh(XXp)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>sorted_indices <span class="op">=</span> np.argsort(eigvals)[::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>eigvals <span class="op">=</span> eigvals[sorted_indices]</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>eigvecs <span class="op">=</span> eigvecs[:, sorted_indices]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Leading eigenvalues:"</span>, np.<span class="bu">round</span>(eigvals[<span class="dv">0</span>:<span class="dv">2</span>],<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Leading eigenvalues: [779.5404 460.1891]</code></pre>
+</div>
+</div>
+</section>
+<section id="mds-dimensions" class="level3" data-number="6.2.3">
+<h3 data-number="6.2.3" class="anchored" data-anchor-id="mds-dimensions"><span class="header-section-number">6.2.3</span> MDS Dimensions</h3>
+<p>We obtain the first two dimensions as <span class="math inline">\(VG^{1/2}\)</span>, i.e., we multiply the first two eigenvectors with the square root of the matching eigenvalue. We add the result to a data frame (<code>mds_classic_df</code>) for easy plotting.</p>
+<div id="02587cb5" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the embedding</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="dv">2</span>  <span class="co"># Number of dimensions</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>top_eigvals <span class="op">=</span> eigvals[:k]</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>top_eigvecs <span class="op">=</span> eigvecs[:, :k]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>embedding <span class="op">=</span> top_eigvecs <span class="op">*</span> np.sqrt(top_eigvals)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>mds_classic_df <span class="op">=</span> pd.DataFrame(embedding, columns<span class="op">=</span>[<span class="st">'Dimension 1'</span>, <span class="st">'Dimension 2'</span>])</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mds_classic_df.head(<span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Dimension 1  Dimension 2
+0    -2.266790     0.434138
+1    -1.179120     1.977893
+2     1.519542     0.677415
+3     2.319006     0.928530
+4     2.369562    -0.240218
+5    -2.548597    -0.089174
+6     3.475160     3.461779
+7     0.214755    -0.683837
+8     0.273706     1.325170
+9     1.427797     0.922841</code></pre>
+</div>
+</div>
+</section>
+<section id="characteristics-of-the-mds-solution" class="level3" data-number="6.2.4">
+<h3 data-number="6.2.4" class="anchored" data-anchor-id="characteristics-of-the-mds-solution"><span class="header-section-number">6.2.4</span> Characteristics of the MDS Solution</h3>
+<section id="stress-function" class="level4" data-number="6.2.4.1">
+<h4 data-number="6.2.4.1" class="anchored" data-anchor-id="stress-function"><span class="header-section-number">6.2.4.1</span> Stress function</h4>
+<p>A measure of how well the higher-dimension distances have been reflected in the embedding is given by the <em>stress function</em>, the squared difference between the pairwise distances in higher dimension and in the embedded space.</p>
+<p>To compute the stress value, we need the <code>pairwise_distance</code> for the embedded coordinates. We then compute the sum of squares of the differences between the two distances (raw stress), and normalize this by dividing by the sum of squares of the original distance matrix. This is implemented in the <code>stress_value</code> function imported from the <code>spatial_cluster_helper</code> module. This function only requires two arguments, the original pairwise distance matrix, here <code>dist_matrix</code>, and the <span class="math inline">\(n\)</span> by 2 matrix of embedded coordinates, here <code>embedding</code>. The return is a tuple consisting of the raw stress measure (not standardized) and the normalized stress.</p>
+<div id="5aed4b12" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>r1, nr1 <span class="op">=</span> stress_value(dist_matrix, embedding)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Raw Stress:"</span>, np.<span class="bu">round</span>(r1, <span class="dv">4</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Normalized Stress:"</span>, np.<span class="bu">round</span>(nr1, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Raw Stress: 105792.7325
+Normalized Stress: 0.3941</code></pre>
+</div>
+</div>
+<p>The normalized stress value computed here is identical to the measure shown in Figure 3.3. of the <em>GeoDa Spatial Cluster</em> book.</p>
+</section>
+<section id="rank-correlation" class="level4" data-number="6.2.4.2">
+<h4 data-number="6.2.4.2" class="anchored" data-anchor-id="rank-correlation"><span class="header-section-number">6.2.4.2</span> Rank correlation</h4>
+<p>Another common measure to indicate the quality of the MDS embedding is the rank correlation between the original and embedded distance matrices. The small function <code>distcorr</code> from the <code>spatial_cluster_helper</code> module computes the Spearman rank correlation using the <code>spearmanr</code> function from <code>scipy.stats</code>. To avoid duplication in the computation (since the distance matrix is symmetric and has a zero diagonal), the function first extracts the upper diagonal elements from each distance matrix and turns them into a numpy array. It again takes the original pairwise distance matrix, <code>dist_matrix</code> and the embedded coordinate array, <code>embedding</code>, as arguments.</p>
+<p>In our example, the rank correlation is 0.804. This is again identical to the result shown in Figure 3.3 of the <em>GeoDa Spatial Cluster</em> book.</p>
+<div id="c5f35868" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Rank correlation: "</span>, np.<span class="bu">round</span>(distcorr(dist_matrix,embedding), <span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rank correlation:  0.804</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="sec-vizmds" class="level3" data-number="6.2.5">
+<h3 data-number="6.2.5" class="anchored" data-anchor-id="sec-vizmds"><span class="header-section-number">6.2.5</span> Visualizing MDS Results</h3>
+<p>We illustrate the locations of the observations in the two-dimensional MDS space by means of a simple scatter plot applied to the dimension coordinates contained in the <code>mds_classic_df</code> data frame just created. We add labels for the x and y axes. A final customization is to set the <code>color</code> as <code>blue</code>, the transparency <code>alpha = 0.7</code> and the size of the points as <code>s=10</code>.</p>
+<div id="cell-fig-mds-classic-scatter" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(mds_classic_df[<span class="st">'Dimension 1'</span>], mds_classic_df[<span class="st">'Dimension 2'</span>], </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> <span class="st">'blue'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Dimension 1"</span>)</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Dimension 2"</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-mds-classic-scatter" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mds-classic-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-mds-classic-scatter-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mds-classic-scatter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Scatter plot for Classic MDS
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="classic-mds-and-pca" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="classic-mds-and-pca"><span class="header-section-number">6.3</span> Classic MDS and PCA</h2>
+<section id="sec-classpcaviz" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="sec-classpcaviz"><span class="header-section-number">6.3.1</span> Comparing Two Dimensions</h3>
+<p>Since the Classic MDS solution is based on the eigenvalues and eigenvectors of <span class="math inline">\(XX'\)</span>, the dimensions provide the same information as the first two principal components. We illustrate this by showing the associated scatter plots side by side.</p>
+<p>We first compute the principal components using the <code>PCA</code> class from <code>sklearn.decomposition</code> with <code>fit_transform</code>, as illustrated in <a href="PCA.html" class="quarto-xref">Chapter&nbsp;<span>5</span></a>. We add the first two components (the first two columns of <code>pca_res</code>) to a data frame <code>pca_df</code> for plotting. We then apply the same routines as in <a href="#sec-vizmds" class="quarto-xref"><span>Section 6.2.5</span></a> for the scatterplot of MDS dimensions (using <code>mds_classic_df</code>) and the principal components (using <code>pca_df</code>) and ensure the figures are side by side by means of <code>subplots</code>.</p>
+<p>The resulting plots are identical.</p>
+<div id="cell-fig-pca-mds" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Compare with PCA</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>pca_res <span class="op">=</span> PCA(n_components <span class="op">=</span> <span class="dv">2</span>).fit_transform(X)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>pca_df <span class="op">=</span> pd.DataFrame(pca_res[:, :<span class="dv">2</span>], columns <span class="op">=</span> [<span class="st">'Component 1'</span>, <span class="st">'Component 2'</span>])</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">8</span>, <span class="dv">4</span>))  <span class="co"># Create a figure with 1 row and 2 columns</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot MDS results</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(mds_classic_df[<span class="st">'Dimension 1'</span>], mds_classic_df[<span class="st">'Dimension 2'</span>], </span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>                color <span class="op">=</span> <span class="st">'blue'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">"Classic MDS"</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">"Dimension 1"</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Dimension 2"</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].grid(<span class="va">True</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot PCA results</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(pca_df[<span class="st">'Component 1'</span>], pca_df[<span class="st">'Component 2'</span>], </span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>                color <span class="op">=</span> <span class="st">'blue'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">"PCA"</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">"Component 1"</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">"Component 2"</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].grid(<span class="va">True</span>)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-pca-mds" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pca-mds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-pca-mds-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pca-mds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: Comparing MDS-Classic dimensions and PCA
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-classpcavizfirst" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="sec-classpcavizfirst"><span class="header-section-number">6.3.2</span> Comparing the First Dimension</h3>
+<p>Finally, we show a scatter plot of the first principal component against the first MDS dimension. We extract these from their respective data frames, i.e, the just created <code>pca_df</code> and <code>mds_classic_df</code>. We carry out some utility manipulations with the minima and maxima to create a nice graph. The result shows a perfect linear relationship between the two concepts.</p>
+<div id="cell-fig-first-MDS-PCA" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine MDS and PCA results into one DataFrame</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>comparison_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Component 1'</span>: pca_df[<span class="st">'Component 1'</span>],</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Dimension 1'</span>: mds_classic_df[<span class="st">'Dimension 1'</span>]</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> comparison_df[<span class="st">'Component 1'</span>]</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> comparison_df[<span class="st">'Dimension 1'</span>]</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the range for the axes</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>x_min, x_max <span class="op">=</span> x.<span class="bu">min</span>(), x.<span class="bu">max</span>()</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>y_min, y_max <span class="op">=</span> y.<span class="bu">min</span>(), y.<span class="bu">max</span>()</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine the limits for the diagonal line (x = y)</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>min_val <span class="op">=</span> <span class="bu">min</span>(x_min, y_max)  <span class="co"># Smallest value considering the inverted y</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>max_val <span class="op">=</span> <span class="bu">max</span>(x_max, y_min)  <span class="co"># Largest value considering the inverted y</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>plt.scatter(comparison_df[<span class="st">'Component 1'</span>], comparison_df[<span class="st">'Dimension 1'</span>], </span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> <span class="st">'green'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, label <span class="op">=</span> <span class="st">'Data points'</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a>plt.plot([min_val, max_val], [min_val, max_val], color <span class="op">=</span> <span class="st">'red'</span>, </span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>         linestyle <span class="op">=</span> <span class="st">'--'</span>, label <span class="op">=</span> <span class="st">'Diagonal line (x = y)'</span>)</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Component 1 (PCA)"</span>)</span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Dimension 1 (MDS)"</span>)</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-first-mds-pca" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-first-mds-pca-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-first-mds-pca-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-first-mds-pca-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: Comparison of first MDS dimension and first principal component
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="mds-analysis-with-scikit-learn" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="mds-analysis-with-scikit-learn"><span class="header-section-number">6.4</span> MDS Analysis With Scikit-Learn</h2>
+<section id="smacof" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="smacof"><span class="header-section-number">6.4.1</span> SMACOF</h3>
+<p>The <code>MDS</code> class in <code>sklearn.manifold</code> does not support the classic MDS solution, but instead implements the SMACOF method due to <span class="citation" data-cites="deLeeuw77">de Leeuw (<a href="bibliography.html#ref-deLeeuw77" role="doc-biblioref">1977</a>)</span> and <span class="citation" data-cites="deLeeuwMair09">de Leeuw and Mair (<a href="bibliography.html#ref-deLeeuwMair09" role="doc-biblioref">2009</a>)</span> (SMACOF stands for “scaling by majorizing a complex function”). Technical details are provided in Section 3.3 of the <em>GeoDa Cluster Book</em>.</p>
+<p>The implementation works as all others in scikit-learn: first an object of the proper class is created, and then a method of the class (typically <code>fit</code> or <code>fit_transform</code>) is applied to find a solution.</p>
+<p>There are two basic ways to accomplish this with an object of the MDS class. One is to apply the <code>fit_transform</code> method, to which the standardized <span class="math inline">\(X\)</span> matrix is passed. This yields a <span class="math inline">\(n \times 2\)</span> numpy array with the embedded coordinates. A second, more comprehensive approach is to apply the generic <code>fit</code> method. This yields an object that contains several characteristics of the solution as attributes, such as the coordinates in <code>embedding_</code> (don’t forget the underscore), the stress value in <code>stress_</code> and the number of iterations in <code>n_iter_</code>. One attribute is <code>dissimilarity_matrix_</code>, the distance matrix for the original data - note that this is NOT the distance matrix for the MDS solution. For <code>metric</code> distance, the stress value is not normalized. We can use the <code>stress_value</code> function from the <code>spatial_cluster_helper</code> module to compute the normalized measure.</p>
+<p>The stress is the only measure of fit provided by the <code>MDS</code> class. To compute a rank correlation, we again use our <code>distcorr</code> function.</p>
+<p>The <code>MDS</code> call takes as arguments the number of desired components, <code>n_components</code> - default 2 -, the type of distance, <code>metric = True</code> by default, a random number seed to ensure reproducibility, <code>random_state</code>, as well as some other arguments. In most cases the default settings are fine and only the <code>random_state</code> should be set to get the same results each time (the initialization is random, so that different results can be obtained depending on the starting values). Full details are given at <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html</a>.</p>
+<p>We first create an MDS object as <code>mds_est</code> and then apply <code>fit_transform</code> to obtain a <span class="math inline">\(n \times 2\)</span> array of embedded coordinates as <code>mds_res</code>. We next turn that array into a data frame (<code>mds_df</code>) for later plotting. The only argument needed is <code>random_state</code>. We set it to <code>123456789</code>, the same as the <code>GeoDa</code> default. For all the other arguments, the default values are fine (e.g., <code>n_components = 2</code>).</p>
+<p>We can safely ignore the warning.</p>
+<div id="f7668ddb" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform MDS using scikit-learn</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>mds_est <span class="op">=</span> MDS(random_state <span class="op">=</span> <span class="dv">123456789</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>mds_res <span class="op">=</span> mds_est.fit_transform(X)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>mds_df <span class="op">=</span> pd.DataFrame(mds_res, columns <span class="op">=</span> [<span class="st">'Dimension 1'</span>, <span class="st">'Dimension 2'</span>])</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(mds_df.head(<span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Users/luc/anaconda3/envs/py313/lib/python3.13/site-packages/sklearn/manifold/_mds.py:677: FutureWarning: The default value of `n_init` will change from 4 to 1 in 1.9.
+  warnings.warn(</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Dimension 1  Dimension 2
+0     4.366106     1.063019
+1     4.060755    -1.026445
+2    -0.177011    -2.509416
+3    -1.042375    -2.565401
+4    -2.059762    -1.746349
+5     1.046476     5.701215
+6    -0.391955    -5.548806
+7    -0.814223     0.428391
+8     2.420641    -2.200385
+9    -1.233516    -2.275464</code></pre>
+</div>
+</div>
+<p>By using the <code>fit_transform</code> method, several attributes were added to the original <code>mds_est</code> object. This is in addition to returning an array with coordinates. For example, the same coordinates are contained in <code>mds_est.embedding_</code>.</p>
+<div id="52973393" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>mds_est.embedding_[<span class="dv">0</span>:<span class="dv">10</span>, :]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>array([[ 4.36610569,  1.06301919],
+       [ 4.06075516, -1.02644466],
+       [-0.17701083, -2.50941605],
+       [-1.0423754 , -2.56540099],
+       [-2.05976176, -1.74634883],
+       [ 1.0464762 ,  5.70121531],
+       [-0.39195529, -5.54880556],
+       [-0.81422257,  0.42839149],
+       [ 2.42064085, -2.20038499],
+       [-1.2335157 , -2.27546384]])</code></pre>
+</div>
+</div>
+<p>If the method <code>fit</code> were used, the output would be an MDS object with the attributes attached, but not a numpy array. Otherwise, there is no distinction between the two approaches.</p>
+</section>
+<section id="visualizing-mds-smacof" class="level3" data-number="6.4.2">
+<h3 data-number="6.4.2" class="anchored" data-anchor-id="visualizing-mds-smacof"><span class="header-section-number">6.4.2</span> Visualizing MDS (SMACOF)</h3>
+<p>As in the case of classic MDS, we can use the columns in the new data frame (<code>mds_df</code>) to create a scatter plot of the coordinates, by means of the same commands as in <a href="#sec-vizmds" class="quarto-xref"><span>Section 6.2.5</span></a>.</p>
+<div id="cell-fig-smacof" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(mds_df[<span class="st">'Dimension 1'</span>], mds_df[<span class="st">'Dimension 2'</span>], </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> <span class="st">'blue'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Dimension 1'</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Dimension 2'</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-smacof" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-smacof-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-smacof-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-smacof-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: MDS SMACOF scatter plot
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="measures-of-fit" class="level3" data-number="6.4.3">
+<h3 data-number="6.4.3" class="anchored" data-anchor-id="measures-of-fit"><span class="header-section-number">6.4.3</span> Measures of Fit</h3>
+<p>The MDS object contains a stress measure in the <code>stress_</code> attribute. However, for metric scaling, this result is not normalized. Also, there is no rank correlation. As mentioned, we can use the <code>stress_value</code> and <code>dist_corr</code> functions from the <code>spatial-cluster-helper</code> module to obtain those properties.</p>
+<div id="7691e8aa" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">round</span>(mds_est.stress_, <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>40675.0</code></pre>
+</div>
+</div>
+<div id="800fea63" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>r2, nr2 <span class="op">=</span> stress_value(dist_matrix, mds_res)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Raw Stress:"</span>, np.<span class="bu">round</span>(r2, <span class="dv">0</span>))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Normalized Stress:"</span>, np.<span class="bu">round</span>(nr2, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Raw Stress: 40675.0
+Normalized Stress: 0.2444</code></pre>
+</div>
+</div>
+<div id="2339001c" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Rank correlation: "</span>, np.<span class="bu">round</span>(distcorr(dist_matrix, mds_res), <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rank correlation:  0.8686</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="smacof-vs-classic-mds" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="smacof-vs-classic-mds"><span class="header-section-number">6.5</span> SMACOF vs classic MDS</h2>
+<section id="comparing-two-dimensions" class="level3" data-number="6.5.1">
+<h3 data-number="6.5.1" class="anchored" data-anchor-id="comparing-two-dimensions"><span class="header-section-number">6.5.1</span> Comparing Two Dimensions</h3>
+<p>To compare the layout obtained by SMACOF MDS to the one from classic MDS, we take the relevant columns from the <code>mds_df</code> (for SMACOF) and <code>mds_classic_df</code> (for classic MDS) dataframes and apply the same matplotlib commands as in <a href="#sec-classpcaviz" class="quarto-xref"><span>Section 6.3.1</span></a> to set the plots side by side.</p>
+<p>The scatter plots reveal quite a bit of discrepancies.</p>
+<div id="cell-fig-classic-smacof" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize <span class="op">=</span> (<span class="dv">8</span>, <span class="dv">4</span>))  </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot MDS SMACOFF results</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].scatter(mds_df[<span class="st">'Dimension 1'</span>], mds_df[<span class="st">'Dimension 2'</span>], </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>                color <span class="op">=</span> <span class="st">'blue'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'MDS-SMACOFF Results'</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Dimension 1'</span>)</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Dimension 2'</span>)</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].grid(<span class="va">True</span>)</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot Classic MDS results</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].scatter(mds_classic_df[<span class="st">'Dimension 1'</span>], </span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>                mds_classic_df[<span class="st">'Dimension 2'</span>], </span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>                color <span class="op">=</span> <span class="st">'blue'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Classic Metric MDS'</span>)</span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'Dimension 1'</span>)</span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Dimension 2'</span>)</span>
+<span id="cb31-18"><a href="#cb31-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].grid(<span class="va">True</span>)</span>
+<span id="cb31-19"><a href="#cb31-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-20"><a href="#cb31-20" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-classic-smacof" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-classic-smacof-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-classic-smacof-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-classic-smacof-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: MDS Classic vs SMACOF
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="comparing-the-first-dimension" class="level3" data-number="6.5.2">
+<h3 data-number="6.5.2" class="anchored" data-anchor-id="comparing-the-first-dimension"><span class="header-section-number">6.5.2</span> Comparing the First Dimension</h3>
+<p>A closer comparison follows from a scatter plot of the first dimensions against each other, as in <a href="#sec-classpcavizfirst" class="quarto-xref"><span>Section 6.3.2</span></a>. The relevant columns are from <code>mds_df</code> and <code>mds_classic_df</code>.</p>
+<p>The graph clearly illustrates how the two methods result in different lower-dimensional embeddings.</p>
+<div id="cell-fig-MDSclassic-SMACOF-first" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine MDS classic and SMACOF results into one DataFrame</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>comparison_df <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Dimension 1C'</span>: mds_classic_df[<span class="st">'Dimension 1'</span>],</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Dimension 1S'</span>: mds_df[<span class="st">'Dimension 1'</span>]</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> comparison_df[<span class="st">'Dimension 1C'</span>]</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> comparison_df[<span class="st">'Dimension 1S'</span>]</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the range for the axes</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>x_min, x_max <span class="op">=</span> x.<span class="bu">min</span>(), x.<span class="bu">max</span>()</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>y_min, y_max <span class="op">=</span> y.<span class="bu">min</span>(), y.<span class="bu">max</span>()</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Determine the limits for the diagonal line (x = -y)</span></span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>min_val <span class="op">=</span> <span class="bu">min</span>(x_min, <span class="op">-</span>y_max)  <span class="co"># Smallest value considering the inverted y</span></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>max_val <span class="op">=</span> <span class="bu">max</span>(x_max, <span class="op">-</span>y_min)  <span class="co"># Largest value considering the inverted y</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the plot</span></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>plt.scatter(comparison_df[<span class="st">'Dimension 1C'</span>], comparison_df[<span class="st">'Dimension 1S'</span>], </span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>            color <span class="op">=</span> <span class="st">'green'</span>, alpha <span class="op">=</span> <span class="fl">0.7</span>, label <span class="op">=</span> <span class="st">'Data points'</span>,s <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a>plt.plot([min_val, max_val], [<span class="op">-</span>min_val, <span class="op">-</span>max_val], color <span class="op">=</span> <span class="st">'red'</span>,</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>         linestyle <span class="op">=</span> <span class="st">'--'</span>, label <span class="op">=</span> <span class="st">'Diagonal line (x = -y)'</span>)</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Dimension 1 (Classic)'</span>)</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Dimension 1 (MDS-SMACOF)'</span>)</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-mdsclassic-smacof-first" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mdsclassic-smacof-first-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-mdsclassic-smacof-first-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mdsclassic-smacof-first-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.6: First dimension of MDS Classic and SMACOF
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="spatializing-mds" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="spatializing-mds"><span class="header-section-number">6.6</span> Spatializing MDS</h2>
+<p>A distinctive characteristics of the presentation of dimension reduction methods in the <em>GeoDa Cluster Book</em> is the introduction of different ways to <em>spatialize</em> the results of an MDS. This exploits the coordinates of the points in the embedded space as a shortcut for points in higher-dimensional space. In other words, clustering on the MDS points becomes a proxy for multi-dimensional clustering.</p>
+<p>This is particularly relevant for multivariate <em>spatial</em> clustering, which we have seen is a challenge. Instead of tackling this as a multivariate problem, it is approached as an application of the analysis of point clusters in two dimensions.</p>
+<p>We consider two specific applications: a neighbor match test and HDBScan, both computed with the MDS coordinates as variables.</p>
+<section id="neighbor-match-test" class="level3" data-number="6.6.1">
+<h3 data-number="6.6.1" class="anchored" data-anchor-id="neighbor-match-test"><span class="header-section-number">6.6.1</span> Neighbor Match Test</h3>
+<p>One straightforward application is the computation of a <em>neighbor match test</em> on the MDS coordinates. In our current example, this can then be compared to the results of a neighbor match test in 10-dimensional space. As mentioned, it becomes computationally quite challenging to obtain k-nearest neighbors in higher-dimensional spaces, so this provides an easy proxy.</p>
+<p>We compute the neighbor match test by means of <code>pygeoda.neighbor_match_test</code>, as covered in <a href="Multivariate_local.html" class="quarto-xref">Chapter&nbsp;<span>3</span></a>. We first create a new data frame as a concatenation of the original point data with the coordinates from classic MDS, contained in <code>mds_classic_df</code>. We set k = 12 and plot the resulting neighbor cardinality. These results can then be compared to a neighbor match test applied to the original 10 variables (not shown here).</p>
+<div id="d22751ac" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Neighbor Match Test</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>dfs_mds <span class="op">=</span> pd.concat([dfs.reset_index(drop <span class="op">=</span> <span class="va">True</span>), </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                     mds_classic_df.reset_index(drop <span class="op">=</span> <span class="va">True</span>)], axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>dfs_mds_g <span class="op">=</span> pygeoda.<span class="bu">open</span>(dfs_mds)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>nmt <span class="op">=</span> pygeoda.neighbor_match_test(dfs_mds_g, </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>                                  dfs_mds_g[[<span class="st">'Dimension 1'</span>, <span class="st">'Dimension 2'</span>]], <span class="dv">12</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>dfs_mds[<span class="st">'Cardinality'</span>] <span class="op">=</span> nmt[<span class="st">'Cardinality'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-fig-mds-neighbor-match" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">5</span>, <span class="dv">5</span>))</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>dfs_mds.plot(column <span class="op">=</span> <span class="st">'Cardinality'</span>, </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>              ax <span class="op">=</span> ax, </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>              legend <span class="op">=</span> <span class="va">True</span>, </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>              categorical <span class="op">=</span> <span class="va">True</span>, </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>              cmap <span class="op">=</span> <span class="st">'YlOrRd'</span>, </span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>              edgecolor <span class="op">=</span> <span class="st">'black'</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>              linewidth <span class="op">=</span> <span class="fl">0.1</span>)  </span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>ax.set_axis_off()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-mds-neighbor-match" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mds-neighbor-match-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-mds-neighbor-match-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mds-neighbor-match-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.7: MDS Neighbor Match Test
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We observe that there are several locations (banks) with considerable overlap between the neighbors in attribute space and the geographical neighbors. These represent multivariate spatial clusters.</p>
+</section>
+<section id="hdbscan" class="level3" data-number="6.6.2">
+<h3 data-number="6.6.2" class="anchored" data-anchor-id="hdbscan"><span class="header-section-number">6.6.2</span> HDBScan</h3>
+<p>Another alternative to a full multidimensional clustering exercise is to carry out density-based clustering on the MDS coordinate points. In other words, close points in MDS space represent close points in the higher-dimensional attribute space. Clusters in the MDS points detected by a method such as HDBScan thus become a proxy for full multivariate clustering.</p>
+<p>We illustrate this with the <code>HDBSCAN</code> approach from scikit learn, covered in <a href="Density_cluster.html" class="quarto-xref">Chapter&nbsp;<span>4</span></a>. We set <code>min_cluster_size</code> to 7 and extract the dimensions from the <code>dfs_mds</code> data frame. We then map the cluster points in the usual way.</p>
+<p>We also use the <code>cluster_stats</code> function imported from the <code>spatial_cluster_helper</code> module to provide a succint summary of the cluster results. As before, we pass the <code>labels_</code> array to this function.</p>
+<div id="21504f72" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#HDBSCAN</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>hdb_results <span class="op">=</span> HDBSCAN(min_cluster_size <span class="op">=</span> <span class="dv">7</span>).fit(dfs_mds[[<span class="st">'Dimension 1'</span>, </span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>                                                         <span class="st">'Dimension 2'</span>]])</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>hdb_labels <span class="op">=</span> [<span class="bu">str</span>(label) <span class="cf">for</span> label <span class="kw">in</span> hdb_results.labels_]</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>n_clusters_ <span class="op">=</span> <span class="bu">len</span>(<span class="bu">set</span>(hdb_labels)) <span class="op">-</span> (<span class="dv">1</span> <span class="cf">if</span> <span class="st">'-1'</span> <span class="kw">in</span> hdb_labels <span class="cf">else</span> <span class="dv">0</span>)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>n_noise_ <span class="op">=</span> hdb_labels.count(<span class="st">'-1'</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Estimated number of clusters: </span><span class="sc">%d</span><span class="st">"</span> <span class="op">%</span> n_clusters_)</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Estimated number of noise points: </span><span class="sc">%d</span><span class="st">"</span> <span class="op">%</span> n_noise_)</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>dfs_mds[<span class="st">'hdb_cluster'</span>] <span class="op">=</span> hdb_labels</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Estimated number of clusters: 2
+Estimated number of noise points: 54</code></pre>
+</div>
+</div>
+<div id="cell-fig-mds-hdbscan" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">5</span>, <span class="dv">5</span>))</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>dfs_mds.plot(column <span class="op">=</span> <span class="st">'hdb_cluster'</span>, ax <span class="op">=</span> ax, cmap <span class="op">=</span> <span class="st">'Dark2_r'</span>, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>             legend <span class="op">=</span> <span class="va">True</span>, markersize <span class="op">=</span> <span class="dv">10</span>, </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>             legend_kwds <span class="op">=</span> {<span class="st">'loc'</span>: <span class="st">'upper right'</span>, <span class="st">'title'</span>: <span class="st">'HDB_Cluster'</span>})</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>ax.set_axis_off()</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-mds-hdbscan" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mds-hdbscan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-mds-hdbscan-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mds-hdbscan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.8: HDBSCAN on MDS coordinates
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="bbf7099a" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>c_stats <span class="op">=</span> cluster_stats(hdb_results.labels_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Labels  Cardinality
+     -1           54
+      0          199
+      1            8</code></pre>
+</div>
+</div>
+</section>
+<section id="common-coverage-percentage" class="level3" data-number="6.6.3">
+<h3 data-number="6.6.3" class="anchored" data-anchor-id="common-coverage-percentage"><span class="header-section-number">6.6.3</span> Common Coverage Percentage</h3>
+<p>The <em>GeoDa Cluster Book</em> introduces the <em>common coverage percentage</em> as a measure to quantify the extent of <em>local</em> overlap between MDS solutions. This is based on a comparison of k-nearest neighbor <em>spatial weights</em> constructed from the respective coordinates. A special case is to compare the MDS solution to geographical spatial weights, similar in spirit to the principle behind the nearest neighbor match test.</p>
+<p>A number of different applications are possible. First, one can assess the <em>intersection</em> between two spatial weights and the extent to which this matches the overall coverage. For example, if the weights are k-nearest neighbor with k = 6, then the number of non-zero elements in the weights matrix is <span class="math inline">\(n_{max} = n \times k\)</span>. We can use the <code>w_intersection</code> method from <code>libpysal.weights</code> to find the number of common non-zero elements between the two spatial weights as the <code>nonzero</code> attribute of the intersection, say <span class="math inline">\(n_{nonzero}\)</span>. Then the ratio of <span class="math inline">\(n_{nonzero} / n_{max}\)</span> or <span class="math inline">\(n_{nonzero} / n^2\)</span> gives a scale-free measure of the <em>common coverage</em> between the two weights. This is a quantitative measure of the commonality of nearest neighbors between the two sets of coordinates, which is easier to interpret than a visual assessment of the two scatter plots.</p>
+<p>We first illustrate the measures for the classic MDS solution relative to the geographical k-nearest neighbors and then extend this to comparing the classic and SMACOF solutions. We start by going through the different steps in detail to illustrate the logic. Afterwards, we will be using the <code>common_coverage</code> function from the <code>spatial_cluster_helper</code> module.</p>
+<p>The first step is to create spatial weights objects from the geographical coordinates, using <code>libpysal.weights.KNN.from_dataframe</code>, and from the embedded coordinates, using <code>libpysal.weights.KNN.from_array</code> (the coordinates are passed as a <span class="math inline">\(n \times 2\)</span> numpy array). We show the number of <code>nonzero</code> cells as an attribute of the weight object.</p>
+<div id="69bc8a72" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># knn spatial weights for geographical coordinates</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>w_pts <span class="op">=</span> KNN.from_dataframe(dfs, k <span class="op">=</span> <span class="dv">6</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Nonzero weights - geographical coordinates:"</span>, w_pts.nonzero)</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>w_mds_classic <span class="op">=</span> KNN.from_array(embedding, k <span class="op">=</span> <span class="dv">6</span>)</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>w_mds_classic.nonzero</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Nonzero weights - MDS:"</span>, w_mds_classic.nonzero)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Nonzero weights - geographical coordinates: 1566
+Nonzero weights - MDS: 1566</code></pre>
+</div>
+</div>
+<p>Of course, the number of non-zero weights is nothing but <span class="math inline">\(n \times k\)</span>, or 261 x 6. The <em>density</em> of these weights can be compared to a complete coverage (ignoring the diagonals, taking <span class="math inline">\(n^2\)</span> for simplicity) as the ratio nonzero/<span class="math inline">\(n^2\)</span>.</p>
+<p>In this example, this yields about 2.3%.</p>
+<div id="047474bd" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> embedding.shape[<span class="dv">0</span>]</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">round</span>((<span class="fl">100.0</span> <span class="op">*</span> w_pts.nonzero) <span class="op">/</span> n<span class="op">**</span><span class="dv">2</span>,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>2.2989</code></pre>
+</div>
+</div>
+<p>The intersection between the two weights is obtained with the <code>w_intersection</code> method from <code>libpysal.weights</code>. We can then take the ratio of the non-zero elements to the complete coverage or to the maximum obtained for the specific value of k.</p>
+<div id="fb7c2e8e" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>w_mds_knn <span class="op">=</span> w_intersection(w_mds_classic, w_pts, silence_warnings <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>nn_mds <span class="op">=</span> w_mds_knn.nonzero</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Nonzero elements in intersection:"</span>, nn_mds)</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Absolute common coverage (percent):"</span>, np.<span class="bu">round</span>(<span class="fl">100.0</span><span class="op">*</span>nn_mds<span class="op">/</span>n<span class="op">**</span><span class="dv">2</span>,<span class="dv">4</span>))</span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Relative common coverage (percent):"</span>, </span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>      np.<span class="bu">round</span>(<span class="fl">100.0</span><span class="op">*</span>nn_mds<span class="op">/</span>w_pts.nonzero,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Nonzero elements in intersection: 97
+Absolute common coverage (percent): 0.1424
+Relative common coverage (percent): 6.1941</code></pre>
+</div>
+</div>
+<p>If not silenced as in this example, the intersection operation yields some warnings for unconnected observations, which can be safely ignored in this context. The results show 97 overlapping non-zero weights, which yield an absolute common coverage percent (relative to the complete connection) of 0.14% and a relative common coverage percent of 6.19%.</p>
+<p>The common coverage percentage between the point pattern and classic MDS can also be computed by means of the <code>common_coverage</code> function. The two arguments are the point GeoDataFrame (<code>dfs</code>), the n by 2 array with the embedded coordinates (<code>embedding</code>), and the number of nearest neighbors (<code>k = 6</code>). The result is a tuple, containing the number of overlapping neighbors, the common coverage percentage relative to the size of the weights and the common coverage percentage relative to the total number of neighbors.</p>
+<div id="b66e77a0" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>comm_pt_classic <span class="op">=</span> common_coverage(dfs, embedding, k <span class="op">=</span> <span class="dv">6</span>, silence_warnings <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">round</span>(comm_pt_classic,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[97.      0.1424  6.1941]</code></pre>
+</div>
+</div>
+<p>We similarly compute the common coverage percentage between classic MDS and MDS SMACOF. In this case, the first argument is the array with classic MDS coordinates, <code>embedding</code>, and the second argument is the array obtained from <code>MDS</code>, <code>mds_res</code>. The number of nearest neighbors is the default (<code>k = 6</code>) and therefore not specified. The result is again a tuple.</p>
+<div id="0b94830d" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>comm_class_smac <span class="op">=</span> common_coverage(embedding, mds_res, silence_warnings <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(np.<span class="bu">round</span>(comm_class_smac,<span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[587.       0.8617  37.484 ]</code></pre>
+</div>
+</div>
+<p>Relative to the match between the geographic coordinates and MDS, the two MDS solutions show 37.5% overlap in their non-zero intersections.</p>
+</section>
+</section>
+<section id="stochastic-neighbor-embedding-sne" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="stochastic-neighbor-embedding-sne"><span class="header-section-number">6.7</span> Stochastic Neighbor Embedding (SNE)</h2>
+<p>A drawback of the MDS approach is that it employs squared distances in the objective function, and thus emphasizes the impact of points that are far apart. As a consequence, MDS tends to do less well to keep the low-dimensional representation of <em>close</em> data points in high dimension also close together in the embedded space. A different approach is offered by <em>stochastic neighbor embedding</em> (SNE) developed by <span class="citation" data-cites="HintonRoweis03">Hinton and Roweis (<a href="bibliography.html#ref-HintonRoweis03" role="doc-biblioref">2003</a>)</span> and <span class="citation" data-cites="vanderMaatenHinton08">van der Maaten and Hinton (<a href="bibliography.html#ref-vanderMaatenHinton08" role="doc-biblioref">2008</a>)</span>. Instead of basing the alignment between high and low-dimensional representations on a stress function that includes the actual distances, the problem is reformulated as one of matching two different probability distributions. These distributions replace the explicit distance measure by a probability that any point <span class="math inline">\(j\)</span> is a neighbor of a given point <span class="math inline">\(i\)</span>, with this probability as an inverse function of distance.</p>
+<p>The essence of SNE then boils down to matching the probability distribution in high dimensional space to a distribution in low-dimensional embedded space, similar to how distances were matched in MDS. This is based on information-theoretic concepts, such as the Kullback-Leibler Information Criterion (KLIC) measure of fit. Technical details are given in Chapter 4 of the <em>GeoDa Cluster Book</em>.</p>
+<section id="implementation" class="level3" data-number="6.7.1">
+<h3 data-number="6.7.1" class="anchored" data-anchor-id="implementation"><span class="header-section-number">6.7.1</span> Implementation</h3>
+<p>Stochastic Neighbor Embedding (SNE or t-SNE) is implemented as <code>TSNE</code> in <code>sklearn.manifold</code>. The overall interface is very similar to that of <code>MDS</code>, even though the algorithm is totally different. In addition, the results of <code>TSNE</code> are very sensitive to various parameter settings, so that just using the defaults is typically not satisfactory. This is also illustrated with the examples using <code>GeoDa</code> in Chapter 4 of the <em>GeoDa Cluster Book</em>.</p>
+<p>Important arguments in the creation of an object of class <code>SNE</code> are:</p>
+<ul>
+<li><code>n_components</code>: the dimension of the embedding, default = 2</li>
+<li><code>perplexity</code>: a measure of the number of nearest neighbors considered, related to the entropy of the distribution, default = 30.0</li>
+<li><code>learning_rate</code>: multiplier used in the optimization routine, default = ‘auto’</li>
+<li><code>max_iter</code>: the number of iterations, default = 1000</li>
+<li><code>metric</code>: distance metric, default = ‘euclidean’</li>
+<li><code>random_state</code>: random seed to ensure replication, default = None</li>
+</ul>
+<p>Of these, the perplexity turns out to be a critical parameter. It should be adjusted in a sensitivity analysis. Also, as mentioned before, it is good practice to set <code>random_state</code> to a fixed value so that the results can be reproduced.</p>
+<p>Important attributes of a <code>TSNE</code> object are:</p>
+<ul>
+<li><code>embedding_</code>: the resulting coordinate vectors</li>
+<li><code>kl_divergence_</code>: the Kullback-Leibler divergence between the original distribution and the final point distribution</li>
+<li><code>learning_rate_</code>: the effective learning rate</li>
+<li><code>n_iter_</code>: the number of iterations used</li>
+</ul>
+<p>As in the case of <code>MDS</code>, we can use either <code>fit</code> or <code>fit_transform</code> to compute a solution.</p>
+<p>Further details can be found at <a href="https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html">https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html</a>.</p>
+<p>We implement <code>TSNE</code> using <code>fit_transform</code> with the matrix <code>X</code> as argument. We use the familiar matplotlib commands to plot the resulting coordinate scatter plot. The only argument is <code>random_state</code>, which we again set to the same value as in <code>GeoDa</code>. Nevertheless, there are several small differences between the implementation of the highly nonlinear algorithm so that it becomes near impossible to replicate the results exactly. Also, the type of animation possible with <code>GeoDa</code> cannot be achieved in a static Python environment.</p>
+<div id="49c15ce7" class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="co">#stochastic neighbor embedding</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>tsne <span class="op">=</span> TSNE(random_state <span class="op">=</span> <span class="dv">123456789</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>tsne_res <span class="op">=</span> tsne.fit_transform(X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-fig-tsne" class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">4</span>, <span class="dv">4</span>))</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>plt.scatter(tsne_res[:, <span class="dv">0</span>], tsne_res[:, <span class="dv">1</span>],s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'t-SNE feature 1'</span>)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'t-SNE feature 2'</span>)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-tsne" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tsne-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="MDS_files/figure-html/fig-tsne-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tsne-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.9: TSNE dimensions
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Some characteristics of the solution.</p>
+<div id="18a33c97" class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Kullback-Leibler divergence:"</span>, np.<span class="bu">round</span>(tsne.kl_divergence_,<span class="dv">4</span>))</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Number of iterations:"</span>, tsne.n_iter_)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Learning rate:"</span>, tsne.learning_rate_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Kullback-Leibler divergence: 0.7582
+Number of iterations: 999
+Learning rate: 50.0</code></pre>
+</div>
+</div>
+<p>It cannot be emphasized enough that considerable experimentation is needed to assess the sensitivity of the results to the various tuning parameters. This is beyond our current scope.</p>
+</section>
+<section id="solution-characteristics" class="level3" data-number="6.7.2">
+<h3 data-number="6.7.2" class="anchored" data-anchor-id="solution-characteristics"><span class="header-section-number">6.7.2</span> Solution characteristics</h3>
+<p>The t-SNE object created by <code>scikit-learn</code> only contains the Kullback_Leibler divergence as a measure of fit. Alternatives, such as the rank correlation coefficient, can be computed by means of the <code>distcorr</code> function defined above. The two arguments are the original pairwise distance matrix, <code>dist_matrix</code> and the coordinates of the embedded points, contained in <code>tsne_res</code>.</p>
+<div id="f2e66f4e" class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Rank correlation:"</span>, np.<span class="bu">round</span>(distcorr(dist_matrix, tsne_res), <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rank correlation: 0.6275</code></pre>
+</div>
+</div>
+</section>
+<section id="spatializing-t-sne" class="level3" data-number="6.7.3">
+<h3 data-number="6.7.3" class="anchored" data-anchor-id="spatializing-t-sne"><span class="header-section-number">6.7.3</span> Spatializing t-SNE</h3>
+<p>We can apply the same visualization and spatial analysis of the t-SNE coordinates as illustrated above for MDS. This includes a nearest neighbor match test, HDBScan on the t-SNE coordinates, and an assessment of the common coverage percentage. This is not further pursued here.</p>
+</section>
+</section>
+<section id="practice" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="practice"><span class="header-section-number">6.8</span> Practice</h2>
+<p>Given the sensitivity of the results to various starting values for the parameters, considerable experimentation is in order. For example, different random seeds can be considered, and the important parameters of t-SNE adjusted. The results can be compared in terms of their fit with the helper functions <code>stress_value</code> or <code>distcorr</code>, and their degree of overlap assessed visually as well as by means of <code>common_coverage</code>.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-deLeeuw77" class="csl-entry" role="listitem">
+de Leeuw, Jan. 1977. <span>“Applications of Convex Analysis to Multidimensional Scaling.”</span> In <em>Recent Developments in Statistics</em>, edited by J. R. Barra, F. Brodeau, G. Romier, and B. van Cutsem, 133–45. Amsterdam: North Holland.
+</div>
+<div id="ref-deLeeuwMair09" class="csl-entry" role="listitem">
+de Leeuw, Jan, and Patrick Mair. 2009. <span>“Multidimensional Scaling Using Majorization: <span>SMACOF</span> in <span>R</span>.”</span> <em>Journal of Statistical Software</em> 21.
+</div>
+<div id="ref-HintonRoweis03" class="csl-entry" role="listitem">
+Hinton, Geoffrey E., and Sam T. Roweis. 2003. <span>“Stochastic Neighbor Embedding.”</span> In <em>Advances in Neural Information Processing Systems 15 (<span>NIPS</span> 2002)</em>, edited by S. Becker, S. Thun, and K. Obermayer, 833–40. Vancouver, BC: NIPS.
+</div>
+<div id="ref-vanderMaatenHinton08" class="csl-entry" role="listitem">
+van der Maaten, Laurens, and Geoffrey Hinton. 2008. <span>“Visualizing Data Using <span class="nocase">t-SNE</span>.”</span> <em>Journal of Machine Learning Research</em> 9: 2579–2605.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./PCA.html" class="pagination-link" aria-label="Principal Component Analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./hierarchical_clustering.html" class="pagination-link" aria-label="Hierarchical Clustering Methods">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hierarchical Clustering Methods</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2025 GeoDa Press LLC, All Rights Reserved</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

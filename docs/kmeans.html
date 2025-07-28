@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>8&nbsp; Partitioning Clustering Methods – The Python Companion to Spatial Cluster Analysis with GeoDa</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./kmedoids.html" rel="next">
+<link href="./hierarchical_clustering.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./kmeans.html"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Partitioning Clustering Methods</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">The Python Companion to Spatial Cluster Analysis with GeoDa</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Creating_maps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating Thematic Maps</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Multivariate_local.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Multivariate Local Spatial Clusters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Density_cluster.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./PCA.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./MDS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hierarchical Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmeans.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Partitioning Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmedoids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Advanced Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spectral_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Spectral Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatializing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatializing Classic Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Hierarchical Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./partitioned_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Partitioning Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Cluster Validation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bibliography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preliminaries" id="toc-preliminaries" class="nav-link active" data-scroll-target="#preliminaries"><span class="header-section-number">8.1</span> Preliminaries</a>
+  <ul class="collapse">
+  <li><a href="#import-required-modules" id="toc-import-required-modules" class="nav-link" data-scroll-target="#import-required-modules"><span class="header-section-number">8.1.1</span> Import Required Modules</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data"><span class="header-section-number">8.1.2</span> Load Data</a></li>
+  <li><a href="#variables" id="toc-variables" class="nav-link" data-scroll-target="#variables"><span class="header-section-number">8.1.3</span> Variables</a></li>
+  <li><a href="#standardization" id="toc-standardization" class="nav-link" data-scroll-target="#standardization"><span class="header-section-number">8.1.4</span> Standardization</a></li>
+  </ul></li>
+  <li><a href="#clustering-with-dimension-reduction" id="toc-clustering-with-dimension-reduction" class="nav-link" data-scroll-target="#clustering-with-dimension-reduction"><span class="header-section-number">8.2</span> Clustering with Dimension Reduction</a></li>
+  <li><a href="#k-means-principle" id="toc-k-means-principle" class="nav-link" data-scroll-target="#k-means-principle"><span class="header-section-number">8.3</span> K-Means Principle</a></li>
+  <li><a href="#k-means-solution" id="toc-k-means-solution" class="nav-link" data-scroll-target="#k-means-solution"><span class="header-section-number">8.4</span> K-Means Solution</a>
+  <ul class="collapse">
+  <li><a href="#k-means" id="toc-k-means" class="nav-link" data-scroll-target="#k-means"><span class="header-section-number">8.4.1</span> K-means++</a></li>
+  <li><a href="#random-initial-allocation" id="toc-random-initial-allocation" class="nav-link" data-scroll-target="#random-initial-allocation"><span class="header-section-number">8.4.2</span> Random Initial Allocation</a></li>
+  </ul></li>
+  <li><a href="#elbow-plot" id="toc-elbow-plot" class="nav-link" data-scroll-target="#elbow-plot"><span class="header-section-number">8.5</span> Elbow Plot</a></li>
+  <li><a href="#silhouette-score" id="toc-silhouette-score" class="nav-link" data-scroll-target="#silhouette-score"><span class="header-section-number">8.6</span> Silhouette Score</a></li>
+  <li><a href="#practice" id="toc-practice" class="nav-link" data-scroll-target="#practice"><span class="header-section-number">8.7</span> Practice</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-kmeans" class="quarto-section-identifier"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Partitioning Clustering Methods</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This Chapter considers <em>partitioning clustering</em> methods as the second broad category of techniques, with a particular focus on <em>K-Means</em>. K-Means is a partitioning clustering method that starts with an initial solution and moves forward by means of <em>iterative relocation</em> to find a better solution. The objective function is to find an allocation (an <em>encoding</em>) of each observation to one of the <span class="math inline">\(k\)</span> clusters that minimizes the within cluster dissimilarity (or, maximizes the between cluster dissimilarity). This corresponds to the sum of squared deviations from the mean in each cluster, i.e., the within sum of squared errors. The material is discussed in detail in Chapter 6 of the <em>GeoDa Cluster Book</em>.</p>
+<p>The K-Means algorithm is implemented in the <code>KMeans</code> class of <code>sklearn.cluster</code>. As before, to carry out variable standardization we will use <code>StandardScaler</code> from <code>sklearn.preprocessing</code>. To characterize the solution in K-Means, we also apply <code>silhouette_samples</code> and <code>silhouette_score</code> from <code>sklearn.metrics</code>. The specific illustration will implement K-Means clustering on principal components, for which we will again use <code>PCA</code> from <code>sklearn.decomposition</code>, as in <a href="PCA.html" class="quarto-xref">Chapter&nbsp;<span>5</span></a>. We will require <code>numpy</code>, <code>geopandas</code> and <code>matplotlib.pyplot</code> as well.</p>
+<p>Finally, to implement some of the <em>spatialization</em> of these methods, we import several functions from the <code>spatial-cluster-helper</code> package:</p>
+<ul>
+<li><code>ensure_datasets</code></li>
+<li><code>cluster_stats</code></li>
+<li><code>cluster_map</code></li>
+<li><code>cluster_center</code></li>
+<li><code>cluster_fit</code></li>
+<li><code>elbow_plot</code></li>
+<li><code>plot_silhouette</code></li>
+</ul>
+<p>To illustrate K-Means clustering, we will use the same <strong>Chi-SDOH</strong> sample data set as in <a href="Multivariate_local.html" class="quarto-xref">Chapter&nbsp;<span>3</span></a>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Packages">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Packages
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>numpy, geopandas, matplotlib.pyplot, sklearn.cluster, sklearn.preprocessing, sklearn.decomposition, sklearn.metrics, spatial-cluster-helper</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Data Sets">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Data Sets
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Chi-SDOH</p>
+</div>
+</div>
+<section id="preliminaries" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="preliminaries"><span class="header-section-number">8.1</span> Preliminaries</h2>
+<section id="import-required-modules" class="level3" data-number="8.1.1">
+<h3 data-number="8.1.1" class="anchored" data-anchor-id="import-required-modules"><span class="header-section-number">8.1.1</span> Import Required Modules</h3>
+<div id="e49b893f" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_samples, silhouette_score</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spatial_cluster_helper <span class="im">import</span> ensure_datasets, cluster_stats, <span class="op">\</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                cluster_map, cluster_center, <span class="op">\</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                cluster_fit, elbow_plot, plot_silhouette</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="load-data" class="level3" data-number="8.1.2">
+<h3 data-number="8.1.2" class="anchored" data-anchor-id="load-data"><span class="header-section-number">8.1.2</span> Load Data</h3>
+<p>The data are read from the <code>Chicago_SDOH.shp</code> shape file. As usual, we carry out a quick check of the contents.</p>
+<div id="a2bd865b" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setting working folder:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#path = "/your/path/to/data/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> <span class="st">"./datasets/"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the Chicago census tract data:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>shpfile <span class="op">=</span> <span class="st">"Chi-SDOH/Chi-SDOH.shp"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ensure_datasets(shpfile, folder_path <span class="op">=</span> path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> gpd.read_file(path <span class="op">+</span> shpfile)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.shape)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>dfs.head(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(791, 56)</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">OBJECTID</th>
+<th data-quarto-table-cell-role="th">Shape_Leng</th>
+<th data-quarto-table-cell-role="th">Shape_Area</th>
+<th data-quarto-table-cell-role="th">TRACTCE10</th>
+<th data-quarto-table-cell-role="th">geoid10</th>
+<th data-quarto-table-cell-role="th">commarea</th>
+<th data-quarto-table-cell-role="th">ChldPvt14</th>
+<th data-quarto-table-cell-role="th">EP_CROWD</th>
+<th data-quarto-table-cell-role="th">EP_UNINSUR</th>
+<th data-quarto-table-cell-role="th">EP_MINRTY</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">ForclRt</th>
+<th data-quarto-table-cell-role="th">EP_MUNIT</th>
+<th data-quarto-table-cell-role="th">EP_GROUPQ</th>
+<th data-quarto-table-cell-role="th">SchHP_Mi</th>
+<th data-quarto-table-cell-role="th">BrownF_Mi</th>
+<th data-quarto-table-cell-role="th">card</th>
+<th data-quarto-table-cell-role="th">cpval</th>
+<th data-quarto-table-cell-role="th">COORD_X</th>
+<th data-quarto-table-cell-role="th">COORD_Y</th>
+<th data-quarto-table-cell-role="th">geometry</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>22777.477721</td>
+<td>2.119089e+07</td>
+<td>842400.0</td>
+<td>1.703184e+10</td>
+<td>44.0</td>
+<td>30.2</td>
+<td>2.0</td>
+<td>18.6</td>
+<td>100.0</td>
+<td>...</td>
+<td>0.0</td>
+<td>6</td>
+<td>0.0</td>
+<td>0.323962</td>
+<td>0.825032</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1176.183467</td>
+<td>1849.533205</td>
+<td>POLYGON ((1177796.742 1847712.428, 1177805.261...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>16035.054986</td>
+<td>8.947394e+06</td>
+<td>840300.0</td>
+<td>1.703184e+10</td>
+<td>59.0</td>
+<td>38.9</td>
+<td>4.8</td>
+<td>25.2</td>
+<td>85.9</td>
+<td>...</td>
+<td>0.0</td>
+<td>2</td>
+<td>0.0</td>
+<td>2.913039</td>
+<td>0.833580</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1161.787888</td>
+<td>1882.078567</td>
+<td>POLYGON ((1163591.927 1881471.238, 1163525.437...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>15186.400644</td>
+<td>1.230614e+07</td>
+<td>841100.0</td>
+<td>1.703184e+10</td>
+<td>34.0</td>
+<td>40.4</td>
+<td>4.9</td>
+<td>32.1</td>
+<td>95.6</td>
+<td>...</td>
+<td>0.0</td>
+<td>42</td>
+<td>0.1</td>
+<td>1.534987</td>
+<td>0.245875</td>
+<td>0.0</td>
+<td>0.0</td>
+<td>1174.481923</td>
+<td>1889.069999</td>
+<td>POLYGON ((1176041.55 1889791.988, 1176042.377 ...</td>
+</tr>
+</tbody>
+</table>
+
+<p>3 rows × 56 columns</p>
+</div>
+</div>
+</div>
+<div id="c4524a8e" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the full set of variables</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">list</span>(dfs.columns))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>['OBJECTID', 'Shape_Leng', 'Shape_Area', 'TRACTCE10', 'geoid10', 'commarea', 'ChldPvt14', 'EP_CROWD', 'EP_UNINSUR', 'EP_MINRTY', 'Ovr6514P', 'EP_AGE17', 'EP_DISABL', 'EP_NOHSDP', 'EP_LIMENG', 'EP_SNGPNT', 'Pov14', 'EP_PCI', 'Unemp14', 'EP_NOVEH', 'FORCLRISK', 'HealthLit', 'CarC14P', 'CAR', 'NOCAR', 'CTA14P', 'CTA', 'CmTm14', 'Undr514P', 'Wht14P', 'WHT50PCT', 'Wht', 'Blk14P', 'BLCK50PCT', 'Blk', 'Hisp14P', 'HISP50PCT', 'Hisp', 'Pop2014', 'PDENS14', 'MEANMI_07', 'MEANMI_11', 'MEANMI_14', 'FACHANGE', 'PCRIMERT15', 'VCRIMERT15', 'ForclRt', 'EP_MUNIT', 'EP_GROUPQ', 'SchHP_Mi', 'BrownF_Mi', 'card', 'cpval', 'COORD_X', 'COORD_Y', 'geometry']</code></pre>
+</div>
+</div>
+</section>
+<section id="variables" class="level3" data-number="8.1.3">
+<h3 data-number="8.1.3" class="anchored" data-anchor-id="variables"><span class="header-section-number">8.1.3</span> Variables</h3>
+<p>As in Chapter 6 of the <em>GeoDa Cluster Book</em>, we select variables that are a close match to the variables identified in <span class="citation" data-cites="Kolaketal20">Kolak et al. (<a href="bibliography.html#ref-Kolaketal20" role="doc-biblioref">2020</a>)</span> for an analysis that includes all U.S. census tracts. However, unlike what is the case in <a href="hierarchical_clustering.html" class="quarto-xref">Chapter&nbsp;<span>7</span></a>, the observations here are for census tracts and not for Community Areas. We select 16 variables:</p>
+<div id="tbl-variables-kmeans" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-variables-kmeans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8.1: K-Means Variables
+</figcaption>
+<div aria-describedby="tbl-variables-kmeans-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Column Name</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EP_MINRTY</td>
+<td style="text-align: left;">Minority population share</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ovr6514P</td>
+<td style="text-align: left;">Population share aged &gt; 65</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EP_AGE17</td>
+<td style="text-align: left;">Population share aged &lt; 18</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EP_DISABL</td>
+<td style="text-align: left;">Disabled population share</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EP_HOHSDP</td>
+<td style="text-align: left;">No high school</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EP_LIMENG</td>
+<td style="text-align: left;">Limited English proficiency</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EP_SNGPNT</td>
+<td style="text-align: left;">Percentage of single parent households</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Pov14</td>
+<td style="text-align: left;">Poverty rate</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EP_PCI</td>
+<td style="text-align: left;">Per capita income</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Unemp14</td>
+<td style="text-align: left;">Unemployment rate</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EP_UNINSUR</td>
+<td style="text-align: left;">Percent without health insurance</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EP_CROWD</td>
+<td style="text-align: left;">Percent crowded housing</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EP_NOVEH</td>
+<td style="text-align: left;">Percent without a car</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ChldPvt14</td>
+<td style="text-align: left;">Child poverty rate</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">HealthLit</td>
+<td style="text-align: left;">Health literacy index</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">FORCLRISK</td>
+<td style="text-align: left;">Foreclosure risk</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>As in the previous chapter, we start by creating a list with the respective variables names, <code>varlist</code>, and obtain a subset of the full data set for just these variables, as <code>data_cluster</code>. We compute some simple descriptive statistics by applying the <code>describe</code> method to this data set. The results are rounded to two decimals.</p>
+<div id="21ec3a2c" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>varlist <span class="op">=</span> [<span class="st">'EP_MINRTY'</span>, <span class="st">'Ovr6514P'</span>, <span class="st">'EP_AGE17'</span>, <span class="st">'EP_DISABL'</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>           <span class="st">'EP_NOHSDP'</span>, <span class="st">'EP_LIMENG'</span>, <span class="st">'EP_SNGPNT'</span>, <span class="st">'Pov14'</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>           <span class="st">'EP_PCI'</span>, <span class="st">'Unemp14'</span>, <span class="st">'EP_UNINSUR'</span>, <span class="st">'EP_CROWD'</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>           <span class="st">'EP_NOVEH'</span>, <span class="st">'ChldPvt14'</span>, <span class="st">'HealthLit'</span>, <span class="st">'FORCLRISK'</span>]</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>data_cluster <span class="op">=</span> dfs[varlist]</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>np.<span class="bu">round</span>(data_cluster.describe(), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">EP_MINRTY</th>
+<th data-quarto-table-cell-role="th">Ovr6514P</th>
+<th data-quarto-table-cell-role="th">EP_AGE17</th>
+<th data-quarto-table-cell-role="th">EP_DISABL</th>
+<th data-quarto-table-cell-role="th">EP_NOHSDP</th>
+<th data-quarto-table-cell-role="th">EP_LIMENG</th>
+<th data-quarto-table-cell-role="th">EP_SNGPNT</th>
+<th data-quarto-table-cell-role="th">Pov14</th>
+<th data-quarto-table-cell-role="th">EP_PCI</th>
+<th data-quarto-table-cell-role="th">Unemp14</th>
+<th data-quarto-table-cell-role="th">EP_UNINSUR</th>
+<th data-quarto-table-cell-role="th">EP_CROWD</th>
+<th data-quarto-table-cell-role="th">EP_NOVEH</th>
+<th data-quarto-table-cell-role="th">ChldPvt14</th>
+<th data-quarto-table-cell-role="th">HealthLit</th>
+<th data-quarto-table-cell-role="th">FORCLRISK</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+<td>791.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>69.55</td>
+<td>10.74</td>
+<td>22.60</td>
+<td>11.26</td>
+<td>19.20</td>
+<td>7.84</td>
+<td>13.00</td>
+<td>20.13</td>
+<td>27956.98</td>
+<td>15.57</td>
+<td>18.48</td>
+<td>4.76</td>
+<td>26.89</td>
+<td>31.10</td>
+<td>242.53</td>
+<td>23.49</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>30.27</td>
+<td>6.02</td>
+<td>8.54</td>
+<td>5.54</td>
+<td>13.58</td>
+<td>9.86</td>
+<td>9.79</td>
+<td>14.78</td>
+<td>19592.21</td>
+<td>10.09</td>
+<td>9.05</td>
+<td>4.80</td>
+<td>14.86</td>
+<td>22.36</td>
+<td>14.58</td>
+<td>23.77</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>6.20</td>
+<td>0.70</td>
+<td>1.10</td>
+<td>0.40</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>3077.00</td>
+<td>0.60</td>
+<td>1.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>0.00</td>
+<td>125.86</td>
+<td>0.20</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>42.00</td>
+<td>6.50</td>
+<td>17.55</td>
+<td>7.10</td>
+<td>8.90</td>
+<td>0.00</td>
+<td>5.10</td>
+<td>7.65</td>
+<td>14679.00</td>
+<td>7.90</td>
+<td>11.70</td>
+<td>1.05</td>
+<td>15.00</td>
+<td>11.55</td>
+<td>234.16</td>
+<td>5.54</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>80.80</td>
+<td>9.50</td>
+<td>23.30</td>
+<td>10.20</td>
+<td>17.40</td>
+<td>3.00</td>
+<td>11.10</td>
+<td>17.80</td>
+<td>21216.00</td>
+<td>13.00</td>
+<td>17.90</td>
+<td>3.30</td>
+<td>24.20</td>
+<td>29.80</td>
+<td>245.16</td>
+<td>13.56</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>97.90</td>
+<td>13.60</td>
+<td>28.45</td>
+<td>15.35</td>
+<td>27.50</td>
+<td>14.00</td>
+<td>19.20</td>
+<td>29.95</td>
+<td>33835.50</td>
+<td>20.70</td>
+<td>24.45</td>
+<td>7.05</td>
+<td>37.85</td>
+<td>48.20</td>
+<td>252.58</td>
+<td>30.84</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>100.00</td>
+<td>47.00</td>
+<td>50.70</td>
+<td>34.40</td>
+<td>65.40</td>
+<td>47.00</td>
+<td>56.50</td>
+<td>73.10</td>
+<td>127743.00</td>
+<td>51.80</td>
+<td>45.00</td>
+<td>25.80</td>
+<td>79.20</td>
+<td>93.60</td>
+<td>271.90</td>
+<td>100.00</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="standardization" class="level3" data-number="8.1.4">
+<h3 data-number="8.1.4" class="anchored" data-anchor-id="standardization"><span class="header-section-number">8.1.4</span> Standardization</h3>
+<p>Before proceeding further, we extract the number of observations and compute the scaling factor <span class="math inline">\(\sqrt{(n-1)/n}\)</span> needed to replicate the results from <code>GeoDa</code> (<a href="hierarchical_clustering.html" class="quarto-xref">see Chapter&nbsp;<span>7</span></a>).</p>
+<div id="8c76487c" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> data_cluster.shape[<span class="dv">0</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>nn <span class="op">=</span> np.sqrt((n<span class="op">-</span><span class="fl">1.0</span>)<span class="op">/</span>n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="clustering-with-dimension-reduction" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="clustering-with-dimension-reduction"><span class="header-section-number">8.2</span> Clustering with Dimension Reduction</h2>
+<p>In practice, when many variables are involved, it is often more efficient to carry out the clustering exercise after a dimension reduction. More specifically, the clustering is applied to the main principal components of the original variables.</p>
+<p>We first transform the variables using <code>StandardScaler</code>. In order to retain compatibility with the results for <code>GeoDa</code>, we rescale those results by <span class="math inline">\(\sqrt{(n-1)/n}\)</span> (the <code>nn</code> variable just created) and then apply the <code>PCA().fit()</code> method to create <code>pca_res</code> as the result object. The factor loadings are in the resulting <code>components_</code> attribute of <code>pca_res</code>.</p>
+<div id="db6e9d03" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>X0 <span class="op">=</span> StandardScaler().fit_transform(data_cluster)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>X1 <span class="op">=</span> X0 <span class="op">*</span> nn</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>pca_res <span class="op">=</span> PCA().fit(X1)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>pca_res.components_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>array([[ 0.33824863, -0.02767885,  0.29159216,  0.19532335,  0.28473044,
+         0.10177461,  0.3168122 ,  0.32666508, -0.32245438,  0.28719305,
+         0.25713029,  0.22366353,  0.11580138,  0.31762617, -0.01704885,
+         0.21435943],
+       [-0.06920095, -0.32122211,  0.10745714, -0.36333146,  0.28673661,
+         0.49749526, -0.07628474, -0.10662782, -0.04344009, -0.25805376,
+         0.2914494 ,  0.33241983, -0.29503893, -0.09891616, -0.0204966 ,
+        -0.20096159],
+       [ 0.12996788,  0.60193803, -0.07823625,  0.30737561,  0.1736577 ,
+         0.23359596, -0.21902106, -0.2687673 , -0.18572297, -0.05220259,
+         0.10643154, -0.03100825, -0.36802528, -0.20257751,  0.06986895,
+         0.29048044],
+       [-0.06484105,  0.19858591, -0.27120191,  0.19752884,  0.12097044,
+         0.1780976 , -0.16748035,  0.11172722,  0.06180415, -0.08390976,
+         0.16760664,  0.17480623,  0.49277773,  0.08114224,  0.54731901,
+        -0.37205383],
+       [-0.01771277, -0.15430746,  0.27237767, -0.12234097, -0.07065488,
+        -0.13099058,  0.10975812, -0.05803475,  0.02937634,  0.08607726,
+        -0.17815627,  0.01667127, -0.30711122, -0.01610845,  0.81831768,
+         0.21128788],
+       [ 0.15756767, -0.27192672, -0.49211235, -0.2640276 , -0.08233546,
+        -0.00680378, -0.24531422, -0.08693787,  0.04371917,  0.21192293,
+         0.39138329, -0.07029299,  0.15546542,  0.00915944,  0.07987495,
+         0.52839605],
+       [ 0.01710768,  0.14042738,  0.08052682, -0.06484484,  0.05513617,
+        -0.09825969,  0.05014743, -0.13348896,  0.32292809, -0.04858752,
+        -0.25859919,  0.71569002,  0.27523261, -0.22636103, -0.10216948,
+         0.33631691],
+       [-0.16928011,  0.27475708, -0.02465148, -0.25609387,  0.18292454,
+         0.24739228, -0.10725098,  0.32512576,  0.42180632, -0.07999192,
+        -0.19287099, -0.13646173, -0.12495858,  0.55518004, -0.0303803 ,
+         0.22996604],
+       [-0.00366352, -0.17391089, -0.1757881 ,  0.33651032, -0.25661352,
+        -0.31037813, -0.28562529,  0.11156684, -0.10007061, -0.31050183,
+         0.06369376,  0.40983189, -0.35046234,  0.40884423, -0.03103305,
+        -0.0013363 ],
+       [-0.28616948,  0.30497287,  0.04181145, -0.25696408, -0.20205869,
+        -0.11617441, -0.16391205,  0.04675566, -0.04089465,  0.66793167,
+         0.20014968,  0.27524592, -0.20015627,  0.02827778, -0.05035372,
+        -0.25868787],
+       [-0.14025286, -0.39449529, -0.00575086,  0.3928861 ,  0.46309684,
+         0.04619709, -0.40271685, -0.0020914 ,  0.13575911,  0.40899255,
+        -0.30225178, -0.03112526, -0.06129094, -0.08418149, -0.04981699,
+        -0.0132952 ],
+       [ 0.11945958, -0.02109346, -0.07423843,  0.27807943,  0.07746011,
+        -0.11638656,  0.3777289 , -0.12652341,  0.68040839,  0.0816599 ,
+         0.41594474, -0.03565666, -0.24529279, -0.02160758, -0.0047099 ,
+        -0.14017415],
+       [ 0.65392971,  0.02857446, -0.41314791, -0.19960292,  0.03019588,
+         0.07188768,  0.09233702,  0.00192229, -0.01145205,  0.16188207,
+        -0.4171966 ,  0.11025993, -0.20233042,  0.04403266,  0.02200409,
+        -0.30084813],
+       [ 0.49377496,  0.01040831,  0.53729337, -0.0248907 , -0.24908989,
+         0.05908971, -0.51860949, -0.10202386,  0.25115871, -0.00255258,
+         0.11041623, -0.09225063,  0.14637002,  0.07289198, -0.01903675,
+        -0.10480098],
+       [-0.10246771, -0.14452211, -0.04574585,  0.29993213, -0.58534793,
+         0.65843969,  0.16817894, -0.02235705,  0.06151077,  0.17480916,
+        -0.14577086,  0.07255365,  0.00221709,  0.02588026, -0.01670772,
+         0.09896415],
+       [ 0.08847644,  0.01348562, -0.02523972,  0.02229942, -0.10450118,
+         0.00886041, -0.11167941,  0.78815678,  0.10381648, -0.08261031,
+         0.06746452, -0.00240211, -0.14912046, -0.54632534,  0.01832656,
+         0.05467755]])</code></pre>
+</div>
+</div>
+<p>The results match the values in Figure 6.12 of the <em>GeoDa Cluster Book</em>, except that the loadings on each principal component are represented by a row. The share of the explained variance is given by the <code>explained_variance_ratio_</code> attribute. The cumulative share is then easily computed by means of <code>numpy</code> <code>cumsum</code>. The result reveals how the first four components explain 77.4% of the total variance.</p>
+<div id="40c0d5f3" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>np.cumsum(pca_res.explained_variance_ratio_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>array([0.44343332, 0.61996478, 0.70615391, 0.77350516, 0.8348708 ,
+       0.8680793 , 0.894729  , 0.91510188, 0.9331911 , 0.94876398,
+       0.96125779, 0.97276386, 0.98239453, 0.98997297, 0.99598198,
+       1.        ])</code></pre>
+</div>
+</div>
+<p>The variance of each component is included in the <code>explained_variance_</code> attribute. These are also the eigenvalues of <span class="math inline">\(X'X\)</span>. We use the Kaiser criterion and select the four principal components with an eigenvalue larger than one.</p>
+<div id="bfd18d02" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pca_res.explained_variance_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>array([7.09493309, 2.82450339, 1.37902613, 1.07761989, 0.98185035,
+       0.531336  , 0.42639517, 0.32596605, 0.28942756, 0.24916599,
+       0.19990103, 0.18409716, 0.15409062, 0.12125515, 0.09614416,
+       0.06428826])</code></pre>
+</div>
+</div>
+<p>We will replicate the example in the <em>GeoDa Cluster Book</em> and carry out the clustering exercise on these four principal components. These are obtained by the <code>transform</code> method of <code>pca_res</code>, from which we extract the first four columns and turn them into a data frame. For the cluster analysis, we first need to standardize the principal components with <code>StandardScaler</code>. We also rescale them by <code>nn</code> to conform to the <code>GeoDa</code> results.</p>
+<div id="51cb981d" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pca_vars <span class="op">=</span> pca_res.transform(X1)[:, <span class="dv">0</span>:<span class="dv">4</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>pca_df <span class="op">=</span> pd.DataFrame(pca_vars, columns<span class="op">=</span>[<span class="st">"PC1"</span>, <span class="st">"PC2"</span>, <span class="st">"PC3"</span>, <span class="st">"PC4"</span>])</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>XX <span class="op">=</span> StandardScaler().fit_transform(pca_df)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> XX <span class="op">*</span> nn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="k-means-principle" class="level2" data-number="8.3">
+<h2 data-number="8.3" class="anchored" data-anchor-id="k-means-principle"><span class="header-section-number">8.3</span> K-Means Principle</h2>
+<p>The iterative relocation principle that underlies K-Means computes a new set of cluster centers after each move and then allocates observations to their nearest center. This is the classic <em>Lloyds</em> algorithm, a special case of EM (expectation, maximization). It stops when no further improvement is possible, but this does <em>not</em> guarantee that a global optimum is reached. In fact, the algorithm can easily get stuck in <em>local</em> optima. For mathematical details, see Chapter 6 of the <em>GeoDa Cluster Book</em>.</p>
+<p>A critical aspect of this process is the initial starting solution. Since all further moves proceed from this initial assignment, the end result critically depends on it. To address this sensitivity, typically several different starting points are compared, each randomly generated.</p>
+<p>We use <code>sklearn.cluster.KMeans</code> to illustrate this method. It works in the same way as the other scikit-learn methods: first an instance of the class is created, to which then a <code>fit</code> method is applied for the given data set (<code>X</code>). The default arguments for a KMeans instance are <code>n_clusters = 8</code>, for the number of clusters, <code>init = "k-means++"</code> for the KMeans++ initialization method, and <code>random_state</code>, a random number seed. Whereas the default for this argument is <code>None</code>, it should be set to an integer value to obtain reproducible results. It should also be kept in mind that the initial starting solution will depend on this random number and it should be varied to assess the sensitivity of the results. Finally, we also set <code>n_init = 150</code> to retain compatibility with <code>GeoDa</code> (the number of initial solutions that are evaluated).</p>
+<p>The final cluster allocation is contained in the usual <code>labels_</code> attribute, which can be summarized and visualized using the helper functions <code>cluster_stats</code>, <code>cluster_center</code>, <code>cluster_fit</code> and <code>cluster_map</code>, as illustrated in <a href="hierarchical_clustering.html" class="quarto-xref">Chapter&nbsp;<span>7</span></a>.</p>
+<p>In addition to the types of analyses of cluster results employed so far, we also try to find the best value for <span class="math inline">\(k\)</span> by means of an <em>elbow plot</em> and assess the solution by means of a <em>silhouette plot</em>.</p>
+</section>
+<section id="k-means-solution" class="level2" data-number="8.4">
+<h2 data-number="8.4" class="anchored" data-anchor-id="k-means-solution"><span class="header-section-number">8.4</span> K-Means Solution</h2>
+<section id="k-means" class="level3" data-number="8.4.1">
+<h3 data-number="8.4.1" class="anchored" data-anchor-id="k-means"><span class="header-section-number">8.4.1</span> K-means++</h3>
+<p>In scikit-learn, the default starting solution is obtained with KMeans++, which is an adjusted random allocation. The equal probabilities from a pure random allocation are adjusted in function of the distance to the remaining points, so as to obtain a more even coverage over all observations.</p>
+<p>We illustrate this method for our principal components with 8 clusters. The only argument that needs to be set is the random number seed. We list the result by means of our <code>cluster_stats</code> helper function.</p>
+<div id="3efa8efd" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>n_clusters <span class="op">=</span> <span class="dv">8</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>kmeans1 <span class="op">=</span> KMeans(n_clusters <span class="op">=</span> n_clusters, n_init <span class="op">=</span> <span class="dv">150</span>, </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                 random_state <span class="op">=</span> <span class="dv">123456789</span>).fit(X) </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>cluster_labels1 <span class="op">=</span> kmeans1.labels_</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>c_stats <span class="op">=</span> cluster_stats(cluster_labels1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Labels  Cardinality
+      0           89
+      1          116
+      2          154
+      3          115
+      4          128
+      5           60
+      6           85
+      7           44</code></pre>
+</div>
+</div>
+<p>The cluster centers are given by the <code>cluster_center</code> helper function. This is not as useful as before since it is expressed in terms of the principal components. However, it can still be used in visualizations by means of a PCP or conditional box plot.</p>
+<div id="e1e0a40d" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>c_means, c_medians <span class="op">=</span> cluster_center(pca_df, cluster_labels1)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Mean Centers:</span><span class="ch">\n</span><span class="st">"</span>, np.<span class="bu">round</span>(c_means, <span class="dv">2</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Median Centers:</span><span class="ch">\n</span><span class="st">"</span>, np.<span class="bu">round</span>(c_medians, <span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Mean Centers:
+           PC1   PC2   PC3   PC4
+cluster                        
+0        1.24 -1.98  1.41 -0.63
+1       -1.13  0.67  0.49  0.29
+2        2.99 -1.26 -1.09 -0.05
+3       -3.51  0.21 -0.98 -0.40
+4        2.06  2.72  0.38  0.28
+5       -2.55 -0.45 -0.98  1.30
+6       -1.15  0.38  0.57 -1.39
+7       -1.10 -1.95  1.35  1.81
+
+Median Centers:
+           PC1   PC2   PC3   PC4
+cluster                        
+0        1.21 -2.01  1.42 -0.56
+1       -1.03  0.65  0.46  0.25
+2        3.11 -1.31 -0.99 -0.06
+3       -3.67  0.27 -1.05 -0.39
+4        1.98  2.65  0.44  0.33
+5       -3.14 -0.40 -0.91  1.15
+6       -1.32  0.31  0.63 -1.22
+7       -1.08 -1.89  1.11  1.84</code></pre>
+</div>
+</div>
+<p>The fit is given by <code>cluster_fit</code>. There are minor differences with the example in <code>GeoDa</code>, due to slightly different random initialization. However, the BSS/TSS ratio is the same, at 0.685.</p>
+<div id="17f74235" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>clusfit <span class="op">=</span> cluster_fit(data <span class="op">=</span> pca_df, clustlabels <span class="op">=</span> cluster_labels1,</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                 n_clusters <span class="op">=</span> n_clusters)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Total Sum of Squares (TSS): 3164.0000000000005
+Within-cluster Sum of Squares (WSS) for each cluster: [103.375 104.333 241.471  91.07  169.104  69.919 116.038 101.08 ]
+Total Within-cluster Sum of Squares (WSS): 996.39
+Between-cluster Sum of Squares (BSS): 2167.61
+Ratio of BSS to TSS: 0.685</code></pre>
+</div>
+</div>
+<p>Finally, <code>cluster_map</code> provides a view of the spatial pattern of the solution.</p>
+<div id="cell-fig-kmeans-clustermap" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>cluster_map(dfs, cluster_labels1, figsize <span class="op">=</span> (<span class="dv">6</span>,<span class="dv">6</span>), </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>            title<span class="op">=</span><span class="st">""</span>, cmap<span class="op">=</span><span class="st">'Set2'</span>, legend_fontsize<span class="op">=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-kmeans-clustermap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kmeans-clustermap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kmeans_files/figure-html/fig-kmeans-clustermap-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kmeans-clustermap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.1: K-Means++ cluster map
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="random-initial-allocation" class="level3" data-number="8.4.2">
+<h3 data-number="8.4.2" class="anchored" data-anchor-id="random-initial-allocation"><span class="header-section-number">8.4.2</span> Random Initial Allocation</h3>
+<p>We also illustrate random initial allocation by setting the argument <code>init = "random"</code>. We only summarize the results with the cluster allocation and measures of fit. The resulting clusters are slightly different, but the overall BSS/TSS ratio is the same as before. Further experimenting with random seeds is recommended, but not further considered here.</p>
+<div id="998a230d" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>kmeans2 <span class="op">=</span> KMeans(n_clusters <span class="op">=</span> n_clusters, init <span class="op">=</span> <span class="st">'random'</span>, </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>                 n_init <span class="op">=</span> <span class="dv">150</span>, random_state <span class="op">=</span> <span class="dv">123456789</span>).fit(X) </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>cluster_labels2 <span class="op">=</span> kmeans2.labels_</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>c_stats <span class="op">=</span> cluster_stats(cluster_labels2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Labels  Cardinality
+      0           61
+      1           83
+      2           44
+      3          154
+      4          117
+      5           89
+      6          129
+      7          114</code></pre>
+</div>
+</div>
+<div id="e6068dda" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>clusfit <span class="op">=</span> cluster_fit(data <span class="op">=</span> pca_df, clustlabels <span class="op">=</span> cluster_labels2,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                 n_clusters <span class="op">=</span> n_clusters)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Total Sum of Squares (TSS): 3164.0000000000005
+Within-cluster Sum of Squares (WSS) for each cluster: [ 71.038 114.852 101.08  241.471 105.99  103.375 168.654  89.956]
+Total Within-cluster Sum of Squares (WSS): 996.416
+Between-cluster Sum of Squares (BSS): 2167.584
+Ratio of BSS to TSS: 0.685</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="elbow-plot" class="level2" data-number="8.5">
+<h2 data-number="8.5" class="anchored" data-anchor-id="elbow-plot"><span class="header-section-number">8.5</span> Elbow Plot</h2>
+<p>So far, we have taken the number of clusters as a given. However, unless a specific policy issue dictates the number, this is typically a variable that needs to be chosen. As the number of clusters goes up, the WSS will necessarily decline. A <em>best</em> number of clusters can be chosen based on the pattern in this decline, by means of the so-called <em>elbow plot</em>. This plot visualizes the decline in WSS (or, alternativatively, the increase in BSS) with an increase in <span class="math inline">\(k\)</span>. A <em>kink</em> in the elbow plot would suggest a point at which increasing <span class="math inline">\(k\)</span> is not worth the decline in WSS. In practice, this is not always that straightforward. The k-means object contains the total WSS in the <code>inertia_</code> attribute.</p>
+<p>We illustrate an elbow plot by running K-Means in a loop for values of n_clusters going from 2 to 20 in a simple line plot. This functionality is also encapsulated in the helper function <code>elbow_plot</code>.</p>
+<div id="cell-fig-elbow-plot" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>inertia <span class="op">=</span> []</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">21</span>):</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    kmeans <span class="op">=</span> KMeans(n_clusters <span class="op">=</span> k, n_init <span class="op">=</span> <span class="dv">150</span>, </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                    random_state<span class="op">=</span><span class="dv">123456789</span>).fit(X)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    inertia.append(kmeans.inertia_)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">21</span>), inertia, marker <span class="op">=</span> <span class="st">'o'</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>plt.xticks(<span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">21</span>, <span class="dv">2</span>))</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-elbow-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-elbow-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kmeans_files/figure-html/fig-elbow-plot-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-elbow-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.2: Elbow plot
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The plot does not show much of a <em>kink</em> in this application. This is actually (unfortunately) the case in many empirical instances. In our illustration, the improvement in WSS seems to decline starting at <span class="math inline">\(k = 6\)</span>.</p>
+<p>The helper function <code>elbow_plot</code> takes as arguments the standardized data and the maximum number of clusters, <code>max_clusters</code> (default 20), as well as some arguments to customize the K-Means algorithm (e.g., <code>init</code>, <code>n_init</code>, <code>random_state</code>). We illustrate this below.</p>
+<p>With <code>X</code> as the standardized data and all the other arguments set to their default values, the elbow plot is invoked as <code>elbow_plot(X)</code>. The result is identical to the graph above.</p>
+<div id="cell-fig-elbow-plothelper" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>elbow_plot(X,title<span class="op">=</span><span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-elbow-plothelper" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-elbow-plothelper-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kmeans_files/figure-html/fig-elbow-plothelper-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-elbow-plothelper-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.3: Elbow plot from helper function
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="silhouette-score" class="level2" data-number="8.6">
+<h2 data-number="8.6" class="anchored" data-anchor-id="silhouette-score"><span class="header-section-number">8.6</span> Silhouette Score</h2>
+<p>A measure of the degree of effective separation between clusters is given by the so-called <em>silhouette</em> coefficient. For each observation assigned to a cluster, this is based on the average distance to the other cluster members (say, <span class="math inline">\(nn_i\)</span>) as well as the average distance to the nearest member in a different cluster (say, <span class="math inline">\(nn_j\)</span>). The silhouette score is then the ratio <span class="math inline">\((nn_j - nn_i)/max(nn_i,nn_j)\)</span>. It varies between +1 (densest) and -1 (least dense). The average of this score over all observations is an overall measure of separation, i.e., the closer this value is to +1, the better the cluster separation.</p>
+<p>Scikit-learn computes the observation-specific silhouette values in <code>sklearn.metrics.silhouette_samples</code>. This takes as arguments the standardized data set (<code>X</code>) and the cluster labels. In our example, this yields an array with 791 values. The mean of this array is the same value as obtained with <code>sklearn.metrics.silhouette_score</code>.</p>
+<div id="b34692cb" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sample_silhouette_values <span class="op">=</span> silhouette_samples(X, cluster_labels1)</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(sample_silhouette_values.shape)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Mean silhouette value:"</span>, np.<span class="bu">round</span>(sample_silhouette_values.mean(), <span class="dv">4</span>))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Silhouette Score:"</span>, np.<span class="bu">round</span>(silhouette_score(X, cluster_labels1), <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(791,)
+Mean silhouette value: 0.2725
+Silhouette Score: 0.2725</code></pre>
+</div>
+</div>
+<p>The typical application for silhouette scores is to plot them as a horizontal bar chart for each cluster, showing the score for each individual observation. For 791 observations, this is not going to be too practical.</p>
+<p>We illustrate the general idea for cluster with label 5, which has only 44 observations. To this effect, we extract the observation label from the initial data frame, then create an array with the silhouette values, ID and cluster label and extract only those observations with cluster label = 5. Finally, we sort on the silhouette values and create two arrays with respectively the observation IDs and the silhouette values in sorted order.</p>
+<p>These arrays are passed to the <code>barh</code> plot with <code>y</code> as the sequence of IDs and <code>width</code> as the actual value of the silhouette score, in a bare bones graph.</p>
+<div id="e2c7f9b2" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">id</span> <span class="op">=</span> np.array(dfs[<span class="st">'OBJECTID'</span>])</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>sil <span class="op">=</span> np.stack((sample_silhouette_values, <span class="bu">id</span>, cluster_labels1), axis <span class="op">=</span> <span class="dv">1</span>)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>silclus <span class="op">=</span> (sil[:,<span class="dv">2</span>] <span class="op">==</span> <span class="dv">5</span>)</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>clus <span class="op">=</span> sil[silclus, :]</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>sorted_indices <span class="op">=</span> np.argsort(clus[:, <span class="dv">0</span>])</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>sortclus <span class="op">=</span> clus[sorted_indices, :]</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>silvals <span class="op">=</span> clus[sorted_indices, <span class="dv">0</span>]</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>sil_labels <span class="op">=</span> clus[sorted_indices, <span class="dv">1</span>]</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>sil_labels <span class="op">=</span> sil_labels.astype(<span class="bu">int</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-fig-silhouette-score" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">8</span>, <span class="dv">8</span>))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>ax.barh(</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    np.arange(<span class="bu">len</span>(silvals)), silvals,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> <span class="st">"red"</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    edgecolor <span class="op">=</span> <span class="st">"black"</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>ax.set_yticks(np.arange(<span class="bu">len</span>(sil_labels)))</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>ax.set_yticklabels(sil_labels, fontsize <span class="op">=</span> <span class="dv">8</span>) </span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-silhouette-score" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-silhouette-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kmeans_files/figure-html/fig-silhouette-score-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-silhouette-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.4: Silhouette score
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The bar plot shows the evolution of the silhouette scores from a maximum of 0.438 to a minimum of -0.128. The labels on the left-hand side correspond with the ID numbers of the census tracts. The negative values for the tracts at the bottom of the graph indicate tracts that do not fit the given cluster very well. These may be candidates to be moved over to a different cluster.</p>
+<p>The <code>plot_silhouette</code> helper function does all the sorting and labeling for a complete silhouette plot. As mentioned, this is only practical for smaller data sets. For our 791 observations, it is a bit of a stretch, but can still be accomplished be setting the <code>figsize = (10,60)</code>. For larger data sets such as these, a better approach would be to create a silhouette for each cluster separately, as illustrated above.</p>
+<div id="cell-fig-silhouette-score-plot" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>plot_silhouette(sample_silhouette_values, dfs[<span class="st">'OBJECTID'</span>], cluster_labels1,</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>                 title <span class="op">=</span> <span class="st">"Silhouette plot"</span>, figsize <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">60</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-silhouette-score-plot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-silhouette-score-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="kmeans_files/figure-html/fig-silhouette-score-plot-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-silhouette-score-plot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8.5: Silhouette score helper plot
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="practice" class="level2" data-number="8.7">
+<h2 data-number="8.7" class="anchored" data-anchor-id="practice"><span class="header-section-number">8.7</span> Practice</h2>
+<p>The K-Means algorithm is very sensitive to the starting value. Assess the effect of using different random seeds, number of initial values and starting point (K-Means++ vs.&nbsp;random) on the solution.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-Kolaketal20" class="csl-entry" role="listitem">
+Kolak, Marynia, Jay Bhatt, Yoon Hong Park, Norma A. Padrón, and Ayrin Molefe. 2020. <span>“Quantification of Neighborhood-Level Social Determinants of Health in the Continental United States.”</span> <em>JAMA Network Open</em> 3 (1): e1919928–28. <a href="https://doi.org/10.1001/jamanetworkopen.2019.19928">https://doi.org/10.1001/jamanetworkopen.2019.19928</a>.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./hierarchical_clustering.html" class="pagination-link" aria-label="Hierarchical Clustering Methods">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hierarchical Clustering Methods</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./kmedoids.html" class="pagination-link" aria-label="Advanced Clustering Methods">
+        <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Advanced Clustering Methods</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2025 GeoDa Press LLC, All Rights Reserved</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

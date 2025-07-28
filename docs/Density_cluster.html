@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; Density Based Clustering – The Python Companion to Spatial Cluster Analysis with GeoDa</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./PCA.html" rel="next">
+<link href="./Multivariate_local.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./Density_cluster.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">The Python Companion to Spatial Cluster Analysis with GeoDa</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Creating_maps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating Thematic Maps</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Multivariate_local.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Multivariate Local Spatial Clusters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Density_cluster.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./PCA.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./MDS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hierarchical Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmeans.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Partitioning Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmedoids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Advanced Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spectral_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Spectral Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatializing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatializing Classic Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Hierarchical Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./partitioned_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Partitioning Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Cluster Validation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bibliography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preliminaries" id="toc-preliminaries" class="nav-link active" data-scroll-target="#preliminaries"><span class="header-section-number">4.1</span> Preliminaries</a>
+  <ul class="collapse">
+  <li><a href="#import-required-modules" id="toc-import-required-modules" class="nav-link" data-scroll-target="#import-required-modules"><span class="header-section-number">4.1.1</span> Import Required Modules</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data"><span class="header-section-number">4.1.2</span> Load Data</a></li>
+  <li><a href="#sec-variables-density" id="toc-sec-variables-density" class="nav-link" data-scroll-target="#sec-variables-density"><span class="header-section-number">4.1.3</span> Variables</a></li>
+  </ul></li>
+  <li><a href="#a-quick-introduction-to-scikit-learn" id="toc-a-quick-introduction-to-scikit-learn" class="nav-link" data-scroll-target="#a-quick-introduction-to-scikit-learn"><span class="header-section-number">4.2</span> A Quick Introduction to scikit-learn</a></li>
+  <li><a href="#dbscan" id="toc-dbscan" class="nav-link" data-scroll-target="#dbscan"><span class="header-section-number">4.3</span> DBSCAN</a>
+  <ul class="collapse">
+  <li><a href="#data-input" id="toc-data-input" class="nav-link" data-scroll-target="#data-input"><span class="header-section-number">4.3.1</span> Data Input</a></li>
+  <li><a href="#cluster-instance" id="toc-cluster-instance" class="nav-link" data-scroll-target="#cluster-instance"><span class="header-section-number">4.3.2</span> Cluster Instance</a></li>
+  <li><a href="#cluster-fit-method" id="toc-cluster-fit-method" class="nav-link" data-scroll-target="#cluster-fit-method"><span class="header-section-number">4.3.3</span> Cluster <code>fit</code> Method</a></li>
+  <li><a href="#cluster-statistics" id="toc-cluster-statistics" class="nav-link" data-scroll-target="#cluster-statistics"><span class="header-section-number">4.3.4</span> Cluster Statistics</a></li>
+  <li><a href="#cluster-map" id="toc-cluster-map" class="nav-link" data-scroll-target="#cluster-map"><span class="header-section-number">4.3.5</span> Cluster Map</a></li>
+  <li><a href="#sensitivity-analysis" id="toc-sensitivity-analysis" class="nav-link" data-scroll-target="#sensitivity-analysis"><span class="header-section-number">4.3.6</span> Sensitivity Analysis</a></li>
+  </ul></li>
+  <li><a href="#hdbscan" id="toc-hdbscan" class="nav-link" data-scroll-target="#hdbscan"><span class="header-section-number">4.4</span> HDBSCAN</a></li>
+  <li><a href="#practice" id="toc-practice" class="nav-link" data-scroll-target="#practice"><span class="header-section-number">4.5</span> Practice</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-densitycluster" class="quarto-section-identifier"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Density-based cluster methods are designed to identify meaningful groupings in point data. <code>GeoDa</code> supports three familiar methods: DBSCAN, DBSCAN* and HDBSCAN. They are discussed in Chapter 20 of the <em>GeoDa Explore Book</em>. DBSCAN and HDBSCAN are implemented in the <code>sklearn.cluster</code> package, but not DBSCAN*.</p>
+<p>To illustrate these methods, we follow Chapter 20 of the <em>GeoDa Explore Book</em> and use the locations of Italian community banks contained in the <strong>italy_banks</strong> sample data set.</p>
+<p>In addition to the <code>sklearn.cluster</code> package mentioned, we will also need the familiar <code>geopandas</code> and <code>numpy</code> packages. As before, we will be using specialized helper functions developed to support the illustration and visualization of spatial clusters, contained in the <code>spatial-cluster-helper</code> package.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Packages">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Packages
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>geopandas, numpy, sklearn.cluster, spatial-cluster-helper</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Data Sets">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Data Sets
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>italy_banks</p>
+</div>
+</div>
+<section id="preliminaries" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="preliminaries"><span class="header-section-number">4.1</span> Preliminaries</h2>
+<section id="import-required-modules" class="level3" data-number="4.1.1">
+<h3 data-number="4.1.1" class="anchored" data-anchor-id="import-required-modules"><span class="header-section-number">4.1.1</span> Import Required Modules</h3>
+<p>We import the relevant modules as mentioned above. Specifically, from <code>sklearn.cluster</code>, we import <code>DBSCAN</code> and <code>HDBSCAN</code>, and from <code>spatial_cluster_helper</code>, we import <code>ensure_datasets</code>, <code>cluster_stats</code> and <code>cluster_map</code>.</p>
+<div id="66af43f0" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> DBSCAN, HDBSCAN</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spatial_cluster_helper <span class="im">import</span> ensure_datasets, cluster_stats, cluster_map</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="load-data" class="level3" data-number="4.1.2">
+<h3 data-number="4.1.2" class="anchored" data-anchor-id="load-data"><span class="header-section-number">4.1.2</span> Load Data</h3>
+<p>We continue to use the same approach as before and assume that the data are contained in a <code>./datasets/</code> directory off the main directory. We use <code>ensure_datasets</code> to check on the presence of the data and then read the <code>italy_banks.shp</code> shape file into <code>dfs</code>.</p>
+<div id="e21dede4" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setting data folder:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#path = "/your/path/to/data/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> <span class="st">"./datasets/"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the Italy community banks point data:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>shpfile <span class="op">=</span> <span class="st">"italy_banks/italy_banks.shp"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ensure_datasets(shpfile, folder_path <span class="op">=</span> path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> gpd.read_file(path <span class="op">+</span> shpfile)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.shape)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.head(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(261, 102)
+   idd                                           BankName    City    latitud  \
+0  1.0  Banca di Andria di Credito Cooperativo SocietÃ...  ANDRIA  41.226694   
+1  8.0  Banca di Credito Cooperativo di Napoli-BCC di ...  NAPLES  40.841020   
+2  9.0  Banca Adria Credito Cooperativo del Delta s.c....   ADRIA  45.052882   
+
+    longitud       COORD_X          XKM       COORD_Y          YKM   ID  ...  \
+0  16.302685  1.112303e+06  1112.303366  4.589794e+06  4589.793823  1.0  ...   
+1  14.250822  9.427720e+05   942.771983  4.534476e+06  4534.475758  8.0  ...   
+2  12.056720  7.407057e+05   740.705695  4.993464e+06  4993.464408  9.0  ...   
+
+    EXPE_16   EXPE_17   SERV_11   SERV_12   SERV_13   SERV_14   SERV_15  \
+0  0.027966  0.025114  0.793877  0.775691  0.745046  0.630469  0.611941   
+1  0.023624  0.018840  0.770019  0.562623  0.540712  0.522125  0.601549   
+2  0.013770  0.012745  0.790542  0.626628  0.515733  0.358735  0.483700   
+
+    SERV_16   SERV_17                         geometry  
+0  0.640208  0.666425  POINT (1112303.366 4589793.823)  
+1  0.502599  0.625220   POINT (942771.983 4534475.758)  
+2  0.567946  0.608880   POINT (740705.695 4993464.408)  
+
+[3 rows x 102 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-variables-density" class="level3" data-number="4.1.3">
+<h3 data-number="4.1.3" class="anchored" data-anchor-id="sec-variables-density"><span class="header-section-number">4.1.3</span> Variables</h3>
+<p>The density-based cluster methods use the point coordinates. In the <strong>italy_banks</strong> sample data set, with projected coordinates, these are converted to kilometers in the variables <code>XKM</code> and <code>YKM</code> for easier interpretation (the original coordinates are in meters). The scikit-learn functions require these as a numpy input array. In order to keep the code generic, we specify <code>coords_array</code> here. Using <code>numpy.vstack</code>, we create a 2 by n array, which we subsequently transpose (<code>T</code>) to get the input as a n by 2 array.</p>
+<div id="cb42da92" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>coords_array <span class="op">=</span> np.vstack([dfs[<span class="st">"XKM"</span>], dfs[<span class="st">"YKM"</span>]]).T</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(coords_array[:<span class="dv">3</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1112.30336594 4589.79382325]
+ [ 942.77198327 4534.47575791]
+ [ 740.70569453 4993.46440835]]</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="a-quick-introduction-to-scikit-learn" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="a-quick-introduction-to-scikit-learn"><span class="header-section-number">4.2</span> A Quick Introduction to scikit-learn</h2>
+<p>The most comprehensive Python library for classical machine learning is scikit-learn, imported as <code>sklearn</code>. Among its extensive functionality, it supports many methods for so-called <em>unsupervised learning</em>, which includes a wide range of clustering techniques. In this Companion, we will be using scikit-learn for all classic non-spatial clustering methods. The complete user guide for scikit-learn can be found at <a href="https://scikit-learn.org/stable/user_guide.html">https://scikit-learn.org/stable/user_guide.html</a>.</p>
+<p>As it turns out, most spatially constrained clustering methods are currently not included in scikit-learn. For the latter methods, we will continue to rely on <code>pygeoda</code>, which supports a subset of the clustering functionality in GeoDa desktop.</p>
+<p>Scikit-learn can be a bit overwhelming at first. Also, the interface may seem a bit strange, but it is fully consistent throughout (not a mean feat when supporting so many different methods). Once the basic principles become more familiar, the elegance of the framework becomes obvious. For our purposes, we can get away with only some basic knowledge.</p>
+<p>The distinguishing characteristic of the scikit-learn design is that it is fully object oriented. Each type of clustering is represented by a class, which needs to be instantiated, i.e., a specific object of that class is generated. The class supports a range of methods and creates attributes. The main method, common to all classes in scikit-learn, is <code>fit</code>. In essence, this applies the clustering algorithm. The results are available as attributes of the object. For example, for all the clustering methods considered in scikit-learn, this is the attribute <code>labels_</code> (don’t forget the underline), a simple numpy array with a label for each observation. It is then up to you to translate this into meaningful information, such as a cluster map. It is also important to remember that all input to scikit-learn consists of numpy arrays, <strong>not</strong> pandas data frames. This typically requires some additional work up front to get the data into the proper format.</p>
+<p>Later, we will also see how <code>sklearn.preprocessing</code> supports a range of data transformations, including standardization. However, here we only consider clustering of point data, which should <strong>not</strong> be standardized. This is because standardization yields new coordinates with the same unit variance in the vertical and horizontal dimension. Unless the original dimensions are square, this will distort the distances. For example, in Italy, which has a much longer vertical dimension than horizontal dimension, distances computed from standardized coordinates will tend to compress vertical separation. This should be avoided, hence the use of coordinates in their original scale.</p>
+<p>We return to the topic of standardization in <a href="PCA.html" class="quarto-xref">Chapter&nbsp;<span>5</span></a>.</p>
+</section>
+<section id="dbscan" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="dbscan"><span class="header-section-number">4.3</span> DBSCAN</h2>
+<p>The principles of density-based clustering were formulated in the DBSCAN algorithm, originally described in <span class="citation" data-cites="Esteretal96">Ester et al. (<a href="bibliography.html#ref-Esteretal96" role="doc-biblioref">1996</a>)</span> and <span class="citation" data-cites="Sanderetal98">Sander et al. (<a href="bibliography.html#ref-Sanderetal98" role="doc-biblioref">1998</a>)</span>, and more recently elaborated upon in <span class="citation" data-cites="GanTao17">Gan and Tao (<a href="bibliography.html#ref-GanTao17" role="doc-biblioref">2017</a>)</span> and <span class="citation" data-cites="Schubertetal17">Schubert et al. (<a href="bibliography.html#ref-Schubertetal17" role="doc-biblioref">2017</a>)</span>. The method is discussed in detail in Chapter 20 of the <em>GeoDa Explore Book</em>.</p>
+<p>The essence of the algorithm is to identify high-density subsets of the data, as an application of so-called <em>bump hunting</em>. This results in a classification of points as <em>core</em>, <em>border</em> and <em>noise</em> points, depending on how far they are from each other and how many points are contained within a critical distance (the <em>density</em>). These two items are critical parameters for the method.</p>
+<p>The critical distance band is referred to as <em>Epsilon distance</em>. It plays a role similar to what the bandwidth achieves in a uniform kernel function and defines the area within which the frequency of points will be assessed. On the other hand, the <em>minimum points</em> criterion corresponds to the smallest number of points contained within the critical distance band to consider the spatial distribution to be <em>dense</em>. Note that in DBSCAN, the center point (around which the Epsilon distance is considered) is part of the minimum points. In other words, a minimum points criterion of 4 implies 3 nearest neighbors.</p>
+<p>In our illustration, we will use the <code>DBSCAN</code> functionality from <code>sklearn.cluster</code>. Full details can be found at <a href="https://scikit-learn.org/stable/modules/clustering.html#dbscan">https://scikit-learn.org/stable/modules/clustering.html#dbscan</a>.</p>
+<section id="data-input" class="level3" data-number="4.3.1">
+<h3 data-number="4.3.1" class="anchored" data-anchor-id="data-input"><span class="header-section-number">4.3.1</span> Data Input</h3>
+<p>As mentioned, scikit-learn expects its input to consist of numpy arrays. In <a href="#sec-variables-density" class="quarto-xref"><span>Section 4.1.3</span></a>, we created <code>coords_array</code> as a n by 2 array, which we will use as the input to the <code>fit</code> method of <code>DBSCAN</code>.</p>
+</section>
+<section id="cluster-instance" class="level3" data-number="4.3.2">
+<h3 data-number="4.3.2" class="anchored" data-anchor-id="cluster-instance"><span class="header-section-number">4.3.2</span> Cluster Instance</h3>
+<p>Before we can carry out any analysis, we must create an instance of an object of the class <code>DBSCAN</code>. This takes two <em>required</em> arguments, <code>eps</code>, the <em>Epsilon distance</em>, and <code>min_samples</code>, the minimum number of points. In our example, matching the illustration of DBSCAN in the <em>GeoDa Explore Book</em>, we set <code>eps = 124.66</code> and <code>min_samples = 4</code> and create the object <code>db_results</code>. The result is an instance of the class DBSCAN, as revealed by a <code>type</code> command. In a typical application, the creation of the object and the application of the <code>fit</code> method can be chained, but we keep them separate for now.</p>
+<div id="8cd16f9d" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>db_results <span class="op">=</span> DBSCAN(eps <span class="op">=</span> <span class="fl">124.66</span>, min_samples <span class="op">=</span> <span class="dv">4</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(db_results))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'sklearn.cluster._dbscan.DBSCAN'&gt;</code></pre>
+</div>
+</div>
+</section>
+<section id="cluster-fit-method" class="level3" data-number="4.3.3">
+<h3 data-number="4.3.3" class="anchored" data-anchor-id="cluster-fit-method"><span class="header-section-number">4.3.3</span> Cluster <code>fit</code> Method</h3>
+<p>So far, we don’t have any actual results. These are obtained by applying the <code>fit</code> method to the cluster object. The <code>fit</code> method takes the numpy array with the x and y coordinates as input. After applying this method, a large number of attributes will be included in the cluster object. At this point, our main interest is in the attribute <code>labels_</code>, which contains the clustering designation of each of the community bank locations. As in Chapter 20 of the <em>GeoDa Explore Book</em>, this example does not contain any <strong>noise</strong> points (those would be labeled as -1). We only have labels 0 and 1, respectively with 242 and 19 members.</p>
+<p>We use the <code>numpy</code> <code>unique</code> function to find the (unique) cluster labels and the respective size of the associated clusters.</p>
+<div id="efea65c2" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>db_results <span class="op">=</span> db_results.fit(coords_array)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># at this point the cluster object contains many methods and attributes</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">dir</span>(db_results))</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># the cluster labels</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(db_results.labels_))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># a brief summary of the cluster categories</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>totclust,clustcount <span class="op">=</span> np.unique(db_results.labels_, return_counts <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(totclust)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"number of different cluster categories (noise points included): "</span>, </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>      <span class="bu">len</span>(totclust))</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"cluster member size: "</span>, clustcount)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>['__annotations__', '__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__firstlineno__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__setstate__', '__sizeof__', '__sklearn_clone__', '__sklearn_tags__', '__static_attributes__', '__str__', '__subclasshook__', '__weakref__', '_build_request_for_signature', '_doc_link_module', '_doc_link_template', '_doc_link_url_param_generator', '_estimator_type', '_get_default_requests', '_get_doc_link', '_get_metadata_request', '_get_param_names', '_get_params_html', '_html_repr', '_parameter_constraints', '_repr_html_', '_repr_html_inner', '_repr_mimebundle_', '_validate_params', 'algorithm', 'components_', 'core_sample_indices_', 'eps', 'fit', 'fit_predict', 'get_metadata_routing', 'get_params', 'labels_', 'leaf_size', 'metric', 'metric_params', 'min_samples', 'n_features_in_', 'n_jobs', 'p', 'set_fit_request', 'set_params']
+&lt;class 'numpy.ndarray'&gt;
+[0 1]
+number of different cluster categories (noise points included):  2
+cluster member size:  [242  19]</code></pre>
+</div>
+</div>
+</section>
+<section id="cluster-statistics" class="level3" data-number="4.3.4">
+<h3 data-number="4.3.4" class="anchored" data-anchor-id="cluster-statistics"><span class="header-section-number">4.3.4</span> Cluster Statistics</h3>
+<p>It would be useful to create a small data frame that lists the labels for each cluster and the number of observations that belong to them. To accomplish this, we use the <code>cluster_stats</code> helper function from the <code>spatial_cluster_helper</code> module. We will reuse this for all future cluster methods, since scikit-learn will consistently put the cluster labels in the <code>labels_</code> attribute (all scikit-learn computed results are labeled with a trailing underline character).</p>
+<p>We can now apply <code>cluster_stats</code> to the output of our DBSCAN application. The only input is the array with cluster labels. The results shows the distribution of the cluster sizes for clusters 0 and 1. Note that unlike what holds for the <code>GeoDa</code> clustering methods, the cluster labels are given in no particular order (in <code>GeoDa</code>, they are sorted by size).</p>
+<div id="63dfab05" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>c_stats <span class="op">=</span> cluster_stats(db_results.labels_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Labels  Cardinality
+      0          242
+      1           19</code></pre>
+</div>
+</div>
+</section>
+<section id="cluster-map" class="level3" data-number="4.3.5">
+<h3 data-number="4.3.5" class="anchored" data-anchor-id="cluster-map"><span class="header-section-number">4.3.5</span> Cluster Map</h3>
+<p>The results of a cluster exercise are best visualized in a so-called cluster map. Again, to save us time later, we use the <code>cluster_map</code> helper function to create a categorical point map for the cluster labels.</p>
+<p>The arguments to <code>cluster_map</code> are the target layer that will show the label categories (in this case, the point layer contained in <code>dfs</code>), the array with cluster labels (<code>labels_</code>), an optional title, an optional <code>baselayer</code> (useful to provide context to a categorical point map), and an optional color map (<code>cmap</code>)</p>
+<p>In our example, we use <code>cmap = 'Dark2_r'</code>. We have no base layer. Note that <code>cluster_map</code> assumes that the point and area layers are in the same projection (there is no check), which should be ensured by reprojection, if necessary, see <a href="Creating_maps.html" class="quarto-xref">Chapter&nbsp;<span>2</span></a>.</p>
+<div id="cell-fig-cluster-map" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cluster_map(dfs, db_results.labels_, title<span class="op">=</span><span class="st">""</span>, cmap<span class="op">=</span><span class="st">'Dark2_r'</span>, legend_fontsize<span class="op">=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-cluster-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cluster-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Density_cluster_files/figure-html/fig-cluster-map-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cluster-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: DBScan cluster map
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sensitivity-analysis" class="level3" data-number="4.3.6">
+<h3 data-number="4.3.6" class="anchored" data-anchor-id="sensitivity-analysis"><span class="header-section-number">4.3.6</span> Sensitivity Analysis</h3>
+<p>The results of DBSCAN are very sensitive to the choice of the parameters <code>eps</code> and <code>min_samples</code>. When changing either one of these parameters in the DBSCAN function, the resulting clusters are typically affected. Below, we set <code>eps = 50</code> and <code>min_samples = 10</code> (following the example in Chapter 20 of the <em>GeoDa Explore Book</em>). Note how we now combine the instantiation of the DBSCAN class with the <code>fit</code> method in one line.</p>
+<p>The result is quite different, with seven clusters identified, as well as 70 noise points.</p>
+<div id="85194c79" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>db_results <span class="op">=</span> DBSCAN(eps <span class="op">=</span> <span class="dv">50</span>, min_samples <span class="op">=</span> <span class="dv">10</span>).fit(coords_array)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>c_stats <span class="op">=</span> cluster_stats(db_results.labels_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Labels  Cardinality
+     -1           70
+      0           19
+      1          110
+      2           14
+      3           11
+      4           16
+      5           10
+      6           11</code></pre>
+</div>
+</div>
+<div id="cell-fig-db-cluster-map" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cluster_map(dfs, db_results.labels_, title<span class="op">=</span><span class="st">""</span>, cmap<span class="op">=</span><span class="st">'Dark2_r'</span>, legend_fontsize<span class="op">=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-db-cluster-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-db-cluster-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Density_cluster_files/figure-html/fig-db-cluster-map-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-db-cluster-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.2: DBScan cluster map (sensitivity analysis)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="hdbscan" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="hdbscan"><span class="header-section-number">4.4</span> HDBSCAN</h2>
+<p>The DBSCAN algorithm lacks some flexibility due to the use of the same critical distance for all points. This turns out to be problematic when the density of the points is very uneven. To remedy this issue, the DBSCAN* method introduced the concepts of <em>core distance</em> and <em>mutual reachability distance</em>. The core distance is the k-nearest neighbor distance for each point. The inverse of this concept (<span class="math inline">\(\lambda = 1/d_{core}\)</span>) corresponds with the notion of <em>density</em>. The mutual reachability distance is a transformation of these core distances that pushes points in low-density regions further away. More specifically, the mutual reachability distance between points A and B is defined as: <span class="math display">\[d_{mr}(A, B) = max[d_{core}(A),d_{core}(B),d(AB)].\]</span> In DBSCAN<em>, the mutual reachability distance takes on the role of the critical distance. DBSCAN</em> is outlined in detail in Chapter 20 of the <em>GeoDa Explore Book</em>, but is currently not supported by <code>sklearn</code>.</p>
+<p>A further refinement was implemented in HDBSCAN, where a flexible distance cut-off was introduced. As a result, only the minimum points criterion must be specified. The distance cut-off is based on a concept of <em>persistence</em>, an indication of the stability of each potential cluster. HDBSCAN was originally proposed by <span class="citation" data-cites="Campelloetal13">Campello, Moulavi, and Sander (<a href="bibliography.html#ref-Campelloetal13" role="doc-biblioref">2013</a>)</span> and more recently elaborated upon by <span class="citation" data-cites="Campelloetal15">Campello et al. (<a href="bibliography.html#ref-Campelloetal15" role="doc-biblioref">2015</a>)</span> and <span class="citation" data-cites="McInnesHealy17">McInnes and Healy (<a href="bibliography.html#ref-McInnesHealy17" role="doc-biblioref">2017</a>)</span>. Extensive technical detail and a toy example are given in Chapter 20 of the <em>GeoDa Explore Book</em>.</p>
+<p>The algorithm is implemented in the <code>HDBSCAN</code> class of <code>sklearn.cluster</code> (see <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html">https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html</a>). To instantiate an object of this class, the only required argument is the <code>min_cluster_size</code> argument, the minimum number of points in a cluster neighborhood. As before, we apply the <code>fit</code> method with as argument the numpy array of point coordinates. The cluster labels are again contained in the <code>labels_</code> attribute.</p>
+<p>We illustrate this using <code>min_cluster_size = 10</code>. We combine the class instantiation and <code>fit</code> method in one line and reuse our <code>cluster_stats</code> and <code>cluster_map</code> functions to summarize the results.</p>
+<p>The results are quite reasonable, yielding seven clusters with sizes ranging from 10 to 67, as well as 69 noise points. As in the DBSCAN case, some experimentation with different parameter settings is highly recommended.</p>
+<div id="525839d4" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>hdb_results <span class="op">=</span> HDBSCAN(min_cluster_size <span class="op">=</span> <span class="dv">10</span>).fit(coords_array)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>c_stats <span class="op">=</span> cluster_stats(hdb_results.labels_)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> Labels  Cardinality
+     -1           69
+      0           20
+      1           41
+      2           12
+      3           20
+      4           10
+      5           67
+      6           22</code></pre>
+</div>
+</div>
+<div id="cell-fig-HDBSCAN" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>cluster_map(dfs, hdb_results.labels_, title<span class="op">=</span><span class="st">""</span>, cmap<span class="op">=</span><span class="st">'Dark2_r'</span>, legend_fontsize<span class="op">=</span><span class="dv">8</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-hdbscan" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hdbscan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="Density_cluster_files/figure-html/fig-hdbscan-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hdbscan-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.3: HDBSCAN cluster map
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="practice" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="practice"><span class="header-section-number">4.5</span> Practice</h2>
+<p>Use your own data set or one of the GeoDa Center or PySAL sample data sets to load a point data file. Compare the results between DBSCAN and HDBSCAN, and assess the impact of changing the relevant parameters.</p>
+
+
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-Campelloetal13" class="csl-entry" role="listitem">
+Campello, Ricardo J. G. B., Davoud Moulavi, and Jörg Sander. 2013. <span>“Density-Based Clustering Based on Hierarchical Density Estimates.”</span> In <em>Advances in Knowledge Discovery and Data Mining. <span>PAKDD</span> 2013. Lecture Notes in Computer Science, Vol. 7819</em>, edited by Jian Pei, Vincent S. Tseng, Longbing Cao, Hiroshi Motoda, and Guandong Xu, 160–72.
+</div>
+<div id="ref-Campelloetal15" class="csl-entry" role="listitem">
+Campello, Ricardo J. G. B., Davoud Moulavi, Arthur Zimek, and Jörg Sandler. 2015. <span>“Hierarchical Density Estimates for Data Clustering, Visualization, and Outlier Detection.”</span> <em>ACM Transactions on Knowledge Discovery from Data</em> 10,1. <a href="https://doi.org/10.1145/2733381">https://doi.org/10.1145/2733381</a>.
+</div>
+<div id="ref-Esteretal96" class="csl-entry" role="listitem">
+Ester, Martin, Hans-Peter Kriegel, Jörg Sander, and Xiaowei Xu. 1996. <span>“A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise.”</span> In <em>KDD-96 Proceedings</em>, 226–31.
+</div>
+<div id="ref-GanTao17" class="csl-entry" role="listitem">
+Gan, Junhao, and Yufei Tao. 2017. <span>“On the Hardness and Approximation of <span>Euclidean</span> <span>DBSCAN</span>.”</span> <em><span>ACM</span> Transactions on Database Systems (<span>TODS</span>)</em> 42: 14.
+</div>
+<div id="ref-McInnesHealy17" class="csl-entry" role="listitem">
+McInnes, Leland, and John Healy. 2017. <span>“Accelerated Hierarchical Density Clustering.”</span> In <em>2017 <span>IEEE</span> International Conference on Data Mining Workshops (<span>ICDMW</span>)</em>. New Orleans, LA. <a href="https://doi.org/10.1109/ICDMW.2017.12">https://doi.org/10.1109/ICDMW.2017.12</a>.
+</div>
+<div id="ref-Sanderetal98" class="csl-entry" role="listitem">
+Sander, Jörg, Martin Ester, Hans-Peter Kriegel, and Xiaowei Xu. 1998. <span>“Density-Based Clustering in Spatial Databases: The Algorithm <span>GDBSCAN</span> and Its Applications.”</span> <em>Data Mining and Knowledge Discovery</em> 2: 169–94.
+</div>
+<div id="ref-Schubertetal17" class="csl-entry" role="listitem">
+Schubert, Erich, Jörg Sander, Martin Ester, Peter Kriegel, and Xiaowei Xu. 2017. <span>“<span>DBSCAN</span> Revisited, Revisited: Why and How You Should (Still) Use <span>DBSCAN</span>.”</span> <em><span>ACM</span> Transactions on Database Systems (<span>TODS</span>)</em> 42: 19.
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./Multivariate_local.html" class="pagination-link" aria-label="Multivariate Local Spatial Clusters">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Multivariate Local Spatial Clusters</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./PCA.html" class="pagination-link" aria-label="Principal Component Analysis">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2025 GeoDa Press LLC, All Rights Reserved</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

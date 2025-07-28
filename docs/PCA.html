@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Principal Component Analysis – The Python Companion to Spatial Cluster Analysis with GeoDa</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./MDS.html" rel="next">
+<link href="./Density_cluster.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-485d01fc63b59abcd3ee1bf1e8e2748d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./PCA.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      <img src="./logo.png" alt="" class="sidebar-logo py-0 d-lg-inline d-none">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">The Python Companion to Spatial Cluster Analysis with GeoDa</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Creating_maps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Creating Thematic Maps</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Multivariate_local.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Multivariate Local Spatial Clusters</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./Density_cluster.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./PCA.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./MDS.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Hierarchical Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmeans.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Partitioning Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./kmedoids.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Advanced Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spectral_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Spectral Clustering</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./spatializing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Spatializing Classic Clustering Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./hierarchical_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Hierarchical Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./partitioned_spatial_clustering.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Spatially Constrained Clustering - Partitioning Methods</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cluster_validation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Cluster Validation</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./bibliography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">References</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preliminaries" id="toc-preliminaries" class="nav-link active" data-scroll-target="#preliminaries"><span class="header-section-number">5.1</span> Preliminaries</a>
+  <ul class="collapse">
+  <li><a href="#import-required-modules" id="toc-import-required-modules" class="nav-link" data-scroll-target="#import-required-modules"><span class="header-section-number">5.1.1</span> Import Required Modules</a></li>
+  <li><a href="#load-data" id="toc-load-data" class="nav-link" data-scroll-target="#load-data"><span class="header-section-number">5.1.2</span> Load Data</a></li>
+  <li><a href="#variables" id="toc-variables" class="nav-link" data-scroll-target="#variables"><span class="header-section-number">5.1.3</span> Variables</a></li>
+  </ul></li>
+  <li><a href="#sec-steps" id="toc-sec-steps" class="nav-link" data-scroll-target="#sec-steps"><span class="header-section-number">5.2</span> Steps in a Principal Components Analysis</a>
+  <ul class="collapse">
+  <li><a href="#standardized-variables" id="toc-standardized-variables" class="nav-link" data-scroll-target="#standardized-variables"><span class="header-section-number">5.2.1</span> Standardized Variables</a></li>
+  <li><a href="#correlation-matrix" id="toc-correlation-matrix" class="nav-link" data-scroll-target="#correlation-matrix"><span class="header-section-number">5.2.2</span> Correlation Matrix</a></li>
+  <li><a href="#eigenvalues-and-eigenvectors" id="toc-eigenvalues-and-eigenvectors" class="nav-link" data-scroll-target="#eigenvalues-and-eigenvectors"><span class="header-section-number">5.2.3</span> Eigenvalues and Eigenvectors</a></li>
+  <li><a href="#sec-steploadings" id="toc-sec-steploadings" class="nav-link" data-scroll-target="#sec-steploadings"><span class="header-section-number">5.2.4</span> Component Loadings</a></li>
+  <li><a href="#sec-stepvardecomp" id="toc-sec-stepvardecomp" class="nav-link" data-scroll-target="#sec-stepvardecomp"><span class="header-section-number">5.2.5</span> Variance Decomposition</a></li>
+  </ul></li>
+  <li><a href="#principal-components-analysis-with-scikit-learn" id="toc-principal-components-analysis-with-scikit-learn" class="nav-link" data-scroll-target="#principal-components-analysis-with-scikit-learn"><span class="header-section-number">5.3</span> Principal Components Analysis With Scikit-Learn</a>
+  <ul class="collapse">
+  <li><a href="#pca-result-properties" id="toc-pca-result-properties" class="nav-link" data-scroll-target="#pca-result-properties"><span class="header-section-number">5.3.1</span> PCA Result Properties</a></li>
+  <li><a href="#sec-princomp" id="toc-sec-princomp" class="nav-link" data-scroll-target="#sec-princomp"><span class="header-section-number">5.3.2</span> Principal Components</a></li>
+  </ul></li>
+  <li><a href="#scree-plot" id="toc-scree-plot" class="nav-link" data-scroll-target="#scree-plot"><span class="header-section-number">5.4</span> Scree Plot</a></li>
+  <li><a href="#visualizing-principal-components" id="toc-visualizing-principal-components" class="nav-link" data-scroll-target="#visualizing-principal-components"><span class="header-section-number">5.5</span> Visualizing Principal Components</a>
+  <ul class="collapse">
+  <li><a href="#biplot" id="toc-biplot" class="nav-link" data-scroll-target="#biplot"><span class="header-section-number">5.5.1</span> Biplot</a></li>
+  </ul></li>
+  <li><a href="#spatializing-the-pca" id="toc-spatializing-the-pca" class="nav-link" data-scroll-target="#spatializing-the-pca"><span class="header-section-number">5.6</span> Spatializing the PCA</a>
+  <ul class="collapse">
+  <li><a href="#box-map" id="toc-box-map" class="nav-link" data-scroll-target="#box-map"><span class="header-section-number">5.6.1</span> Box Map</a></li>
+  <li><a href="#local-moran-cluster-map" id="toc-local-moran-cluster-map" class="nav-link" data-scroll-target="#local-moran-cluster-map"><span class="header-section-number">5.6.2</span> Local Moran Cluster Map</a></li>
+  </ul></li>
+  <li><a href="#practice" id="toc-practice" class="nav-link" data-scroll-target="#practice"><span class="header-section-number">5.7</span> Practice</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span id="sec-pca" class="quarto-section-identifier"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Principal Component Analysis</span></span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>In this Chapter, we consider Principal Component Analysis (PCA), a core method of both multivariate statistics and machine learning, used for dimension reduction. Dimension reduction is particularly relevant in situations where many variables are available that are highly intercorrelated. In essence, the original variables are replaced by a smaller number of proxies that represent them well in terms of their statistical properties. PCA is discussed in detail in Chapter 2 of the <em>GeoDa Cluster Book</em>.</p>
+<p>To illustrate this method, we will again use the <strong>italy_banks</strong> sample data set.</p>
+<p>Principal component analysis is implemented in <code>sklearn.decomposition</code>. The required variable standardization is contained in <code>sklearn.preprocessing</code>. In addition to the usual <code>numpy</code>, <code>pandas</code>, <code>geopandas</code> and <code>matplotlib.pyplot</code> requirements, we will also use <code>matplotlib.lines</code>, as well as <code>spatial-cluster-helper</code> to check on the data. Finally, we implement some local spatial autocorrelation analysis by means of <code>pygeoda</code>.</p>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Packages">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Packages
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>numpy, pandas, geopandas, matplotlib.pyplot, matplotlib.lines, sklearn.decomposition, sklearn.preprocessing, spatial-cluster-helper, pygeoda</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled" title="Required Data Sets">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Required Data Sets
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>italy_banks</p>
+</div>
+</div>
+<section id="preliminaries" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="preliminaries"><span class="header-section-number">5.1</span> Preliminaries</h2>
+<section id="import-required-modules" class="level3" data-number="5.1.1">
+<h3 data-number="5.1.1" class="anchored" data-anchor-id="import-required-modules"><span class="header-section-number">5.1.1</span> Import Required Modules</h3>
+<div id="e49b893f" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> geopandas <span class="im">as</span> gpd</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.lines <span class="im">as</span> pltlines</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> spatial_cluster_helper <span class="im">import</span> ensure_datasets</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pygeoda</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="load-data" class="level3" data-number="5.1.2">
+<h3 data-number="5.1.2" class="anchored" data-anchor-id="load-data"><span class="header-section-number">5.1.2</span> Load Data</h3>
+<p>We follow the usual practice of setting a path (if needed), and reading the data from the Italian banks shape file (<code>italy_banks.shp</code>) into a GeoDataFrame (<code>dfs</code>). We also carry out a quick check of its contents using <code>head</code>. The data set has 261 point locations and 102 variables in UTM Zone 32 projection.</p>
+<div id="a2bd865b" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Setting data folder:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">#path = "/your/path/to/data/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>path <span class="op">=</span> <span class="st">"./datasets/"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Select the Italy community banks point data:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>shpfile <span class="op">=</span> <span class="st">"italy_banks/italy_banks.shp"</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the data:</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>ensure_datasets(shpfile, folder_path <span class="op">=</span> path)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> gpd.read_file(path <span class="op">+</span> shpfile)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.shape)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dfs.head(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>(261, 102)
+   idd                                           BankName    City    latitud  \
+0  1.0  Banca di Andria di Credito Cooperativo SocietÃ...  ANDRIA  41.226694   
+1  8.0  Banca di Credito Cooperativo di Napoli-BCC di ...  NAPLES  40.841020   
+2  9.0  Banca Adria Credito Cooperativo del Delta s.c....   ADRIA  45.052882   
+
+    longitud       COORD_X          XKM       COORD_Y          YKM   ID  ...  \
+0  16.302685  1.112303e+06  1112.303366  4.589794e+06  4589.793823  1.0  ...   
+1  14.250822  9.427720e+05   942.771983  4.534476e+06  4534.475758  8.0  ...   
+2  12.056720  7.407057e+05   740.705695  4.993464e+06  4993.464408  9.0  ...   
+
+    EXPE_16   EXPE_17   SERV_11   SERV_12   SERV_13   SERV_14   SERV_15  \
+0  0.027966  0.025114  0.793877  0.775691  0.745046  0.630469  0.611941   
+1  0.023624  0.018840  0.770019  0.562623  0.540712  0.522125  0.601549   
+2  0.013770  0.012745  0.790542  0.626628  0.515733  0.358735  0.483700   
+
+    SERV_16   SERV_17                         geometry  
+0  0.640208  0.666425  POINT (1112303.366 4589793.823)  
+1  0.502599  0.625220   POINT (942771.983 4534475.758)  
+2  0.567946  0.608880   POINT (740705.695 4993464.408)  
+
+[3 rows x 102 columns]</code></pre>
+</div>
+</div>
+</section>
+<section id="variables" class="level3" data-number="5.1.3">
+<h3 data-number="5.1.3" class="anchored" data-anchor-id="variables"><span class="header-section-number">5.1.3</span> Variables</h3>
+<p>We follow the example in Chapter 2 of the <em>GeoDa Cluster Book</em> and select ten variables for 2013 from the Italian banks sample data set.</p>
+<div id="tbl-variables-pca" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-variables-pca-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: PCA Variables
+</figcaption>
+<div aria-describedby="tbl-variables-pca-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 86%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Column Name</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CAPRAT13</td>
+<td style="text-align: left;">Ratio of capital over risk-weighted assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Z_13</td>
+<td style="text-align: left;">Z-score of return on assets (ROA) + leverage over the standard deviation of ROA</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LIQASS_13</td>
+<td style="text-align: left;">Ratio of liquid assets over total assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NPL_13</td>
+<td style="text-align: left;">Ratio of non-performing loans over total loans</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LLP_13</td>
+<td style="text-align: left;">Ratio of loan loss provision over customer loans</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">INTR_13</td>
+<td style="text-align: left;">Ratio of interest expense over total funds</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">DEPO_13</td>
+<td style="text-align: left;">Ratio of total deposits over total assets</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EQLN_13</td>
+<td style="text-align: left;">Ratio of total equity over customer loans</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">SERV_13</td>
+<td style="text-align: left;">Ratio of net interest income over total operating revenues</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EXPE_13</td>
+<td style="text-align: left;">Ratio of operating expenses over total assets</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The variables are stored in the <code>varlist</code> list for future use. If you want to use a different set of variables, only <code>varlist</code> needs to be updated.</p>
+<div id="0d90ed91" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>varlist <span class="op">=</span> [<span class="st">'CAPRAT13'</span>, <span class="st">'Z_13'</span>, <span class="st">'LIQASS_13'</span>, <span class="st">'NPL_13'</span>, <span class="st">'LLP_13'</span>, </span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                <span class="st">'INTR_13'</span>, <span class="st">'DEPO_13'</span>, <span class="st">'EQLN_13'</span>, <span class="st">'SERV_13'</span>, <span class="st">'EXPE_13'</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="descriptive-statistics" class="level4" data-number="5.1.3.1">
+<h4 data-number="5.1.3.1" class="anchored" data-anchor-id="descriptive-statistics"><span class="header-section-number">5.1.3.1</span> Descriptive statistics</h4>
+<p>We create a subset of our original data set with just the selected variables as <code>data_pca</code>. Correlations among these variables are computed by applying the <code>corr</code> method to this data frame. The results are rounded to two decimals.</p>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_pca <span class="op">=</span> dfs[varlist]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="bu">round</span>(data_pca.corr(), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tbl-pca-corr" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="4">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pca-corr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.2: Correlations among selected variables
+</figcaption>
+<div aria-describedby="tbl-pca-corr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="4">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">CAPRAT13</th>
+<th data-quarto-table-cell-role="th">Z_13</th>
+<th data-quarto-table-cell-role="th">LIQASS_13</th>
+<th data-quarto-table-cell-role="th">NPL_13</th>
+<th data-quarto-table-cell-role="th">LLP_13</th>
+<th data-quarto-table-cell-role="th">INTR_13</th>
+<th data-quarto-table-cell-role="th">DEPO_13</th>
+<th data-quarto-table-cell-role="th">EQLN_13</th>
+<th data-quarto-table-cell-role="th">SERV_13</th>
+<th data-quarto-table-cell-role="th">EXPE_13</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">CAPRAT13</td>
+<td>1.00</td>
+<td>-0.03</td>
+<td>0.21</td>
+<td>-0.08</td>
+<td>-0.10</td>
+<td>-0.39</td>
+<td>0.18</td>
+<td>0.87</td>
+<td>0.32</td>
+<td>0.14</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">Z_13</td>
+<td>-0.03</td>
+<td>1.00</td>
+<td>-0.08</td>
+<td>-0.28</td>
+<td>-0.16</td>
+<td>-0.02</td>
+<td>-0.15</td>
+<td>-0.02</td>
+<td>-0.04</td>
+<td>-0.14</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">LIQASS_13</td>
+<td>0.21</td>
+<td>-0.08</td>
+<td>1.00</td>
+<td>-0.00</td>
+<td>-0.05</td>
+<td>-0.14</td>
+<td>0.23</td>
+<td>0.09</td>
+<td>0.01</td>
+<td>0.18</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">NPL_13</td>
+<td>-0.08</td>
+<td>-0.28</td>
+<td>-0.00</td>
+<td>1.00</td>
+<td>0.64</td>
+<td>0.33</td>
+<td>-0.09</td>
+<td>-0.10</td>
+<td>-0.20</td>
+<td>0.15</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">LLP_13</td>
+<td>-0.10</td>
+<td>-0.16</td>
+<td>-0.05</td>
+<td>0.64</td>
+<td>1.00</td>
+<td>0.41</td>
+<td>-0.19</td>
+<td>-0.14</td>
+<td>-0.39</td>
+<td>-0.04</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">INTR_13</td>
+<td>-0.39</td>
+<td>-0.02</td>
+<td>-0.14</td>
+<td>0.33</td>
+<td>0.41</td>
+<td>1.00</td>
+<td>-0.43</td>
+<td>-0.48</td>
+<td>-0.40</td>
+<td>-0.18</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">DEPO_13</td>
+<td>0.18</td>
+<td>-0.15</td>
+<td>0.23</td>
+<td>-0.09</td>
+<td>-0.19</td>
+<td>-0.43</td>
+<td>1.00</td>
+<td>0.18</td>
+<td>0.17</td>
+<td>0.16</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">EQLN_13</td>
+<td>0.87</td>
+<td>-0.02</td>
+<td>0.09</td>
+<td>-0.10</td>
+<td>-0.14</td>
+<td>-0.48</td>
+<td>0.18</td>
+<td>1.00</td>
+<td>0.39</td>
+<td>0.12</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">SERV_13</td>
+<td>0.32</td>
+<td>-0.04</td>
+<td>0.01</td>
+<td>-0.20</td>
+<td>-0.39</td>
+<td>-0.40</td>
+<td>0.17</td>
+<td>0.39</td>
+<td>1.00</td>
+<td>0.07</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">EXPE_13</td>
+<td>0.14</td>
+<td>-0.14</td>
+<td>0.18</td>
+<td>0.15</td>
+<td>-0.04</td>
+<td>-0.18</td>
+<td>0.16</td>
+<td>0.12</td>
+<td>0.07</td>
+<td>1.00</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Note that the correlations are all rather low, which will constitute a challenge for dimension reduction.</p>
+</section>
+</section>
+</section>
+<section id="sec-steps" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-steps"><span class="header-section-number">5.2</span> Steps in a Principal Components Analysis</h2>
+<p>Before illustrating the application of PCA by means of <code>sklearn.decomposition</code>, we first examine in detail the computational steps that are carried out under the hood. These steps consist of:</p>
+<ul>
+<li>standardizing the variables</li>
+<li>constructing the correlation matrix</li>
+<li>computing eigenvalues and eigenvectors of the correlation matrix</li>
+<li>deriving principal component loadings from the eigenvectors</li>
+<li>computing the variance decomposition from the eigenvalues</li>
+</ul>
+<section id="standardized-variables" class="level3" data-number="5.2.1">
+<h3 data-number="5.2.1" class="anchored" data-anchor-id="standardized-variables"><span class="header-section-number">5.2.1</span> Standardized Variables</h3>
+<p>The first step in the PCA analysis is to standardize the data, which is accomplished using the <code>StandardScaler</code> class in <code>sklearn.preprocessing</code>. Recall how everything in scikit-learn is a class to which specific methods are applied, or from which specific attributes are extracted. The method used for standardization to a mean of zero and variance of one is <code>fit_transform</code> applied to a <code>StandardScaler</code> object (additional arguments can be passed to <code>StandardScaler</code> to select different transformations, etc., but here we take the default settings). We use the <code>data_pca</code> data frame as input.</p>
+<p>Descriptive statistics of the resulting data frame, computed by means of <code>describe</code>, reveal that indeed the mean is zero and the standard deviation is one. Note that <code>StandardScaler</code> uses a consistent estimate of the variance, i.e., the sum of squared deviations from the mean is divided by the number of observations. In contrast, in <code>GeoDa</code>, an unbiased estimate is used in which the same sum is divided by the number of observations less one (for the estimated mean). This does not affect the principal component analysis, but it will be relevant in the later cluster analyses carried out with <code>sklearn</code>.</p>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Standardize the data</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> StandardScaler().fit_transform(data_pca)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>pd.DataFrame(X).describe().<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="tbl-standardized-stats" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="5">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-standardized-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.3: Descriptive statistics for standardized variables
+</figcaption>
+<div aria-describedby="tbl-standardized-stats-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe do-not-create-environment cell caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">0</th>
+<th data-quarto-table-cell-role="th">1</th>
+<th data-quarto-table-cell-role="th">2</th>
+<th data-quarto-table-cell-role="th">3</th>
+<th data-quarto-table-cell-role="th">4</th>
+<th data-quarto-table-cell-role="th">5</th>
+<th data-quarto-table-cell-role="th">6</th>
+<th data-quarto-table-cell-role="th">7</th>
+<th data-quarto-table-cell-role="th">8</th>
+<th data-quarto-table-cell-role="th">9</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">count</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+<td>261.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">mean</td>
+<td>-0.00</td>
+<td>-0.00</td>
+<td>-0.00</td>
+<td>0.00</td>
+<td>-0.00</td>
+<td>-0.00</td>
+<td>0.00</td>
+<td>-0.00</td>
+<td>-0.00</td>
+<td>-0.00</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">std</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">min</td>
+<td>-1.42</td>
+<td>-0.76</td>
+<td>-1.27</td>
+<td>-1.94</td>
+<td>-1.68</td>
+<td>-2.28</td>
+<td>-2.34</td>
+<td>-1.33</td>
+<td>-3.07</td>
+<td>-2.34</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">25%</td>
+<td>-0.64</td>
+<td>-0.54</td>
+<td>-0.75</td>
+<td>-0.76</td>
+<td>-0.69</td>
+<td>-0.70</td>
+<td>-0.74</td>
+<td>-0.67</td>
+<td>-0.66</td>
+<td>-0.73</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">50%</td>
+<td>-0.29</td>
+<td>-0.29</td>
+<td>-0.24</td>
+<td>-0.11</td>
+<td>-0.16</td>
+<td>-0.04</td>
+<td>-0.06</td>
+<td>-0.28</td>
+<td>-0.01</td>
+<td>-0.10</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">75%</td>
+<td>0.48</td>
+<td>0.08</td>
+<td>0.41</td>
+<td>0.64</td>
+<td>0.45</td>
+<td>0.68</td>
+<td>0.80</td>
+<td>0.44</td>
+<td>0.68</td>
+<td>0.55</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">max</td>
+<td>5.49</td>
+<td>5.97</td>
+<td>3.66</td>
+<td>2.76</td>
+<td>3.90</td>
+<td>2.07</td>
+<td>2.40</td>
+<td>4.92</td>
+<td>2.51</td>
+<td>3.41</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="correlation-matrix" class="level3" data-number="5.2.2">
+<h3 data-number="5.2.2" class="anchored" data-anchor-id="correlation-matrix"><span class="header-section-number">5.2.2</span> Correlation Matrix</h3>
+<p>The next step is to compute the associated correlation matrix, as the cross product of the transpose of the matrix of standardized data, <code>X.T</code> with <code>X</code>, divided by the number of observations. Note that this gives the same result as computed above using <code>data_pca.corr()</code>. In our calculation, <code>n</code> corresponds with the number of observations (rows of <code>X</code>). Note how these values are the same as in <a href="#tbl-pca-corr" class="quarto-xref">Table&nbsp;<span>5.2</span></a>.</p>
+<div id="ae85ba4a-b83c-4944-b5fd-89941c0770f5" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> X.shape[<span class="dv">0</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> np.dot(X.T, X)<span class="op">/</span>n</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>C.<span class="bu">round</span>(<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>array([[ 1.  , -0.03,  0.21, -0.08, -0.1 , -0.39,  0.18,  0.87,  0.32,
+         0.14],
+       [-0.03,  1.  , -0.08, -0.28, -0.16, -0.02, -0.15, -0.02, -0.04,
+        -0.14],
+       [ 0.21, -0.08,  1.  , -0.  , -0.05, -0.14,  0.23,  0.09,  0.01,
+         0.18],
+       [-0.08, -0.28, -0.  ,  1.  ,  0.64,  0.33, -0.09, -0.1 , -0.2 ,
+         0.15],
+       [-0.1 , -0.16, -0.05,  0.64,  1.  ,  0.41, -0.19, -0.14, -0.39,
+        -0.04],
+       [-0.39, -0.02, -0.14,  0.33,  0.41,  1.  , -0.43, -0.48, -0.4 ,
+        -0.18],
+       [ 0.18, -0.15,  0.23, -0.09, -0.19, -0.43,  1.  ,  0.18,  0.17,
+         0.16],
+       [ 0.87, -0.02,  0.09, -0.1 , -0.14, -0.48,  0.18,  1.  ,  0.39,
+         0.12],
+       [ 0.32, -0.04,  0.01, -0.2 , -0.39, -0.4 ,  0.17,  0.39,  1.  ,
+         0.07],
+       [ 0.14, -0.14,  0.18,  0.15, -0.04, -0.18,  0.16,  0.12,  0.07,
+         1.  ]])</code></pre>
+</div>
+</div>
+</section>
+<section id="eigenvalues-and-eigenvectors" class="level3" data-number="5.2.3">
+<h3 data-number="5.2.3" class="anchored" data-anchor-id="eigenvalues-and-eigenvectors"><span class="header-section-number">5.2.3</span> Eigenvalues and Eigenvectors</h3>
+<p>The coefficient loadings that are used to transform the original variables into principal components are obtained as the eigenvectors of the correlation matrix. We use the <code>eig</code> function from <code>numpy.linalg</code> to compute both eigenvalues and eigenvectors. Note how the <code>linalg.eig</code> function returns a tuple, with two arrays. The first is a vector with the eigenvalues, the second is a <span class="math inline">\(p \times p\)</span> matrix with the eigenvectors as columns, where <span class="math inline">\(p\)</span> is the number of variables. More precisely, the first column of this matrix is the eigenvector for the first eigenvalue, etc.</p>
+<p>Keep in mind that the eigenvalues will not necessarily be sorted. So we will also need to sort them from the greatest value to the smallest. This is accomplished by means of <code>numpy.argsort</code> (the order needs to be reversed, hence the use of <code>[::-1]</code>)</p>
+<p>In our code, we first compute the arrays for the tuple of eigenvalues and eigenvectors as <code>E_values</code> and <code>E_vectors</code>. We obtain the <code>sorted_indices</code> from the eigenvalues in <code>E_values</code> so that we can re-order the arrays for both eigenvalues and eigenvectors.</p>
+<div id="ae5dd451" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute the eigenvalues and eigenvectors to use as loadings</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>E_values, E_vectors <span class="op">=</span> np.linalg.eig(C)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Sort eigenvalues and eigenvectors in descending order</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>sorted_indices <span class="op">=</span> np.argsort(E_values)[::<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>E_values <span class="op">=</span> E_values[sorted_indices]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>E_vectors <span class="op">=</span> E_vectors[:, sorted_indices]</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Eigenvalues:</span><span class="ch">\n</span><span class="st">'</span>,E_values.<span class="bu">round</span>(<span class="dv">3</span>))</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Eigenvectors:</span><span class="ch">\n</span><span class="st">'</span>,E_vectors.<span class="bu">round</span>(<span class="dv">3</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Eigenvalues:
+ [2.987 1.763 1.263 0.961 0.843 0.738 0.607 0.424 0.304 0.11 ]
+Eigenvectors:
+ [[ 0.417 -0.289  0.4    0.201  0.054  0.035  0.178 -0.218  0.021  0.677]
+ [ 0.014  0.42   0.236  0.565 -0.292 -0.392 -0.452 -0.068  0.04   0.003]
+ [ 0.148 -0.229 -0.39   0.639  0.203  0.507 -0.205  0.129 -0.    -0.094]
+ [-0.264 -0.546  0.081 -0.106 -0.07  -0.121 -0.409  0.063  0.65   0.032]
+ [-0.333 -0.453  0.222  0.094  0.124 -0.234 -0.17   0.234 -0.687 -0.004]
+ [-0.454 -0.03   0.14   0.082 -0.015  0.31  -0.013 -0.807 -0.083 -0.109]
+ [ 0.277 -0.133 -0.483 -0.064  0.382 -0.542 -0.164 -0.443 -0.068 -0.024]
+ [ 0.438 -0.241  0.44   0.068  0.027 -0.049  0.144 -0.085  0.06  -0.719]
+ [ 0.363  0.066  0.091 -0.443 -0.114  0.35  -0.676 -0.068 -0.247  0.037]
+ [ 0.131 -0.321 -0.348  0.026 -0.831 -0.065  0.151 -0.112 -0.164 -0.02 ]]</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-steploadings" class="level3" data-number="5.2.4">
+<h3 data-number="5.2.4" class="anchored" data-anchor-id="sec-steploadings"><span class="header-section-number">5.2.4</span> Component Loadings</h3>
+<p>We combine the eigenvectors into a DataFrame <code>pdvec</code>, using the variable names (<code>columns</code> of <code>data_pca</code>) as the <code>index</code> (in <code>pandas</code>, these will become the row names). The eigenvectors are the component loadings of each of the original variables. Note that there are ten components in total, the same number as there are original variables. Dimension reduction will result by replacing the ten variables by a <em>smaller</em> number of principal components, such that a target <em>explained variance</em> is obtained. The smaller the resulting number of needed components, the greater the dimension reduction.</p>
+<p>The loadings show us the weight of each original variable in the newly created components. This allows us to interpret and, potentially, label these new components, although that typically takes considerable creativity.</p>
+<div id="94d4a4e0" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Combine eigenvectors into a data frame</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>L <span class="op">=</span> E_vectors</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>pdvec <span class="op">=</span> pd.DataFrame(L, index <span class="op">=</span> data_pca.columns)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Component Loadings:'</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pdvec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Component Loadings:
+                  0         1         2         3         4         5  \
+CAPRAT13   0.416651 -0.289011  0.400281  0.200754  0.054467  0.034624   
+Z_13       0.013973  0.420044  0.235984  0.564699 -0.291502 -0.392045   
+LIQASS_13  0.147681 -0.229038 -0.390257  0.638757  0.202743  0.506880   
+NPL_13    -0.264109 -0.546288  0.081384 -0.105872 -0.069770 -0.120596   
+LLP_13    -0.332622 -0.452568  0.221917  0.094127  0.124286 -0.234403   
+INTR_13   -0.454442 -0.030416  0.139912  0.081664 -0.015137  0.309591   
+DEPO_13    0.277034 -0.133345 -0.483049 -0.064276  0.381635 -0.541985   
+EQLN_13    0.438027 -0.240695  0.440113  0.068469  0.026698 -0.048546   
+SERV_13    0.362998  0.066494  0.090886 -0.443382 -0.113546  0.349947   
+EXPE_13    0.130787 -0.321352 -0.347914  0.025643 -0.831361 -0.065367   
+
+                  6         7         8         9  
+CAPRAT13   0.177808 -0.218361  0.020765  0.677092  
+Z_13      -0.451626 -0.067665  0.039630  0.002815  
+LIQASS_13 -0.204524  0.129197 -0.000251 -0.094164  
+NPL_13    -0.408614  0.063170  0.650065  0.032139  
+LLP_13    -0.169731  0.234213 -0.687286 -0.004423  
+INTR_13   -0.013168 -0.807004 -0.083059 -0.109131  
+DEPO_13   -0.163713 -0.443464 -0.067723 -0.023698  
+EQLN_13    0.143620 -0.084699  0.059671 -0.719291  
+SERV_13   -0.675579 -0.068169 -0.247354  0.036992  
+EXPE_13    0.151014 -0.111648 -0.163775 -0.019992  </code></pre>
+</div>
+</div>
+</section>
+<section id="sec-stepvardecomp" class="level3" data-number="5.2.5">
+<h3 data-number="5.2.5" class="anchored" data-anchor-id="sec-stepvardecomp"><span class="header-section-number">5.2.5</span> Variance Decomposition</h3>
+<p>An important property of the principal components is how much of the original variance each explains. Since the ten variables are standardized, the total variance equals 10. We verify that this is also the sum of the eigenvalues of <span class="math inline">\(X'X\)</span>. Then we compute the share of the total variance associated with each principal component as the ratio of its eigenvalue to the total variance.</p>
+<div id="48ac5791-16fe-4ee7-8640-03c98cb8a329" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Variance decomposition</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>totvar <span class="op">=</span> np.<span class="bu">sum</span>(E_values)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Total variance:'</span>,totvar)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Variance share</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>varshare <span class="op">=</span> E_values <span class="op">/</span> totvar</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Share of total variance in each component:</span><span class="ch">\n</span><span class="st">'</span>, varshare)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total variance: 10.000000000000007
+Share of total variance in each component:
+ [0.2986745  0.17631768 0.12628661 0.09612748 0.08433105 0.07383474
+ 0.06074807 0.04237308 0.03035229 0.01095451]</code></pre>
+</div>
+</div>
+<p>In addition to the individual variance share, the cumulative variance share is an important property. This provides a measure of how much the components contribute up to a given number of components. This can then be used as a criterion to select the number of components. We compute this by applying <code>numpy.cumsum</code> to the array of variance shares, <code>varshare</code>.</p>
+<div id="5b834992" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>cumvarshare <span class="op">=</span> np.cumsum(varshare)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Cumulative variance share:</span><span class="ch">\n</span><span class="st">'</span>, cumvarshare)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cumulative variance share:
+ [0.2986745  0.47499218 0.60127878 0.69740626 0.78173731 0.85557205
+ 0.91632012 0.9586932  0.98904549 1.        ]</code></pre>
+</div>
+</div>
+<p>A common criterion to select the number of components is the 95% threshold. In our example, this is reached after seven components, not exactly much in terms of dimension reduction. An alternative criterion is the so-called <em>Kaiser criterion</em>, which selects components with an eigenvalue larger than one. The rationale for this is that the variance associated with these components is larger than that for the original variables (standardized to variance one). In our example, the Kaiser criterion would yield three components, a much more reasonable result.</p>
+</section>
+</section>
+<section id="principal-components-analysis-with-scikit-learn" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="principal-components-analysis-with-scikit-learn"><span class="header-section-number">5.3</span> Principal Components Analysis With Scikit-Learn</h2>
+<p>In scikit-learn, principal component analysis is implemented through the <code>PCA</code> class of <code>sklearn.decomposition</code>. This operates in the same fashion as the earlier examples of <code>sklearn</code> that we considered: first an instance of the <code>PCA</code> class is created, to which then a <code>fit</code> method is applied. As we have seen, these operations can be chained.</p>
+<p>In contrast to the procedure outlined in <a href="#sec-steps" class="quarto-xref"><span>Section 5.2</span></a>, the <code>sklearn</code> implementation uses a single value decomposition (SVD) to obtain the relevant eigenvalues and eigenvectors. SVD is applied directly to the <span class="math inline">\(n\)</span> by <span class="math inline">\(p\)</span> matrix <span class="math inline">\(X\)</span> instead of to the cross product. A detailed discussion is given in Chapter 2 of the <em>GeoDa Cluster Book</em>. SVD is also the default method used in <code>GeoDa</code>.</p>
+<p>The PCA results are obtained in a single line command by applying <code>fit</code> to a <code>PCA</code> object, with as argument the standardized matrix <code>X</code>. The result is assigned here to <code>pca_res</code>, an instance of the <code>PCA</code> class that now contains several useful attributes.</p>
+<div id="8a48b7af" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pca_res <span class="op">=</span> PCA().fit(X)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">type</span>(pca_res))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'sklearn.decomposition._pca.PCA'&gt;</code></pre>
+</div>
+</div>
+<section id="pca-result-properties" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="pca-result-properties"><span class="header-section-number">5.3.1</span> PCA Result Properties</h3>
+<p>After an application of the <code>fit</code> method, our <code>pca_res</code> result object has several important attributes:</p>
+<ul>
+<li><code>components_</code>: the factor loadings as an array of rows (not columns as in the example above), one for each component. So, the first row contains the loadings for the first PC, etc.</li>
+<li><code>explained_variance_</code>: the explained variance by each component. As shown above, this corresponds to the matching eigenvalue of <span class="math inline">\(X'X\)</span>.</li>
+<li><code>explained_variance_ratio_</code>: the share of the total variance explained by each component,</li>
+</ul>
+<p>as well as several other, more technical attributes.</p>
+<p>We again collect the component loadings into a data frame, but now organize it differently, with the original variables as columns and the labeled components (from 1 to 10) as rows (we name the rows as sequence numbers using <code>range</code> passed to <code>index</code>). The resulting table is exactly the transpose of the table in <a href="#sec-steploadings" class="quarto-xref"><span>Section 5.2.4</span></a>.</p>
+<div id="b07dc2f8" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Component loadings, row by row</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>pdload <span class="op">=</span> pd.DataFrame(pca_res.components_, </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>             index <span class="op">=</span> <span class="bu">range</span>(<span class="dv">1</span>, pca_res.components_.shape[<span class="dv">0</span>] <span class="op">+</span> <span class="dv">1</span>), </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>             columns <span class="op">=</span> data_pca.columns)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pdload)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    CAPRAT13      Z_13  LIQASS_13    NPL_13    LLP_13   INTR_13   DEPO_13  \
+1  -0.416651 -0.013973  -0.147681  0.264109  0.332622  0.454442 -0.277034   
+2   0.289011 -0.420044   0.229038  0.546288  0.452568  0.030416  0.133345   
+3  -0.400281 -0.235984   0.390257 -0.081384 -0.221917 -0.139912  0.483049   
+4   0.200754  0.564699   0.638757 -0.105872  0.094127  0.081664 -0.064276   
+5  -0.054467  0.291502  -0.202743  0.069770 -0.124286  0.015137 -0.381635   
+6  -0.034624  0.392045  -0.506880  0.120596  0.234403 -0.309591  0.541985   
+7  -0.177808  0.451626   0.204524  0.408614  0.169731  0.013168  0.163713   
+8   0.218361  0.067665  -0.129197 -0.063170 -0.234213  0.807004  0.443464   
+9  -0.020765 -0.039630   0.000251 -0.650065  0.687286  0.083059  0.067723   
+10 -0.677092 -0.002815   0.094164 -0.032139  0.004423  0.109131  0.023698   
+
+     EQLN_13   SERV_13   EXPE_13  
+1  -0.438027 -0.362998 -0.130787  
+2   0.240695 -0.066494  0.321352  
+3  -0.440113 -0.090886  0.347914  
+4   0.068469 -0.443382  0.025643  
+5  -0.026698  0.113546  0.831361  
+6   0.048546 -0.349947  0.065367  
+7  -0.143620  0.675579 -0.151014  
+8   0.084699  0.068169  0.111648  
+9  -0.059671  0.247354  0.163775  
+10  0.719291 -0.036992  0.019992  </code></pre>
+</div>
+</div>
+<p>The explained variance of each component (i.e., the sorted eigenvalues of <span class="math inline">\(X'X\)</span>) are contained in <code>explained_variance_</code>. These are the same results as in <a href="#sec-stepvardecomp" class="quarto-xref"><span>Section 5.2.5</span></a>. The explained variance share does not have to be computed explicitly, since it is contained in the array <code>explained_variance_ratio_</code>. However, the cumulative explained variance share still needs to be calculated by means of <code>numpy.cumsum</code>. The results are again identical to those above.</p>
+<div id="390f8839" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Explained variance of each component</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>pca_res.explained_variance_</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>array([2.99823249, 1.76995822, 1.26772324, 0.96497201, 0.84655397,
+       0.74118715, 0.60981717, 0.42536058, 0.30469032, 0.10996639])</code></pre>
+</div>
+</div>
+<div id="b4c83784" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Explained variance share</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Explained variance share:"</span>, pca_res.explained_variance_ratio_)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Cumulative variance share:"</span>, np.cumsum(pca_res.explained_variance_ratio_))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Explained variance share: [0.2986745  0.17631768 0.12628661 0.09612748 0.08433105 0.07383474
+ 0.06074807 0.04237308 0.03035229 0.01095451]
+
+Cumulative variance share: [0.2986745  0.47499218 0.60127878 0.69740626 0.78173731 0.85557205
+ 0.91632012 0.9586932  0.98904549 1.        ]</code></pre>
+</div>
+</div>
+</section>
+<section id="sec-princomp" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="sec-princomp"><span class="header-section-number">5.3.2</span> Principal Components</h3>
+<p>The actual components are found by applying <code>transform(X)</code> to the PCA result object. This yields a <span class="math inline">\(n\)</span> by <span class="math inline">\(p\)</span> numpy array with the observations as rows and the component scores as columns. To illustrate this, we show the first five rows of the array.</p>
+<div id="c7594708" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The actual principal components</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>pcomps <span class="op">=</span> pca_res.transform(X) </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>pcomps[<span class="dv">0</span>:<span class="dv">5</span>,:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>array([[-2.26679046,  0.43413755,  3.41152327,  0.96571188,  1.04437104,
+        -1.16371188,  0.08190058,  0.14667044,  0.63028628,  0.04197353],
+       [-1.17912038,  1.97789286,  1.42306193,  2.61503026, -0.2044251 ,
+        -1.16313925, -1.11227835,  0.43890689, -0.034723  , -0.43096847],
+       [ 1.51954157,  0.67741483,  1.03804823,  0.89012655, -0.9791715 ,
+         0.13891672, -0.31238392,  1.06950892, -0.7985399 ,  0.03163169],
+       [ 2.31900576,  0.92853046,  0.19192593,  0.3382497 , -0.32122236,
+         0.20426167, -0.30377276, -0.84063078,  0.1894053 ,  0.15740099],
+       [ 2.36956218, -0.24021829, -0.47730339,  0.33135428, -0.28279248,
+        -0.46963886, -0.42419014,  0.29410648, -0.37962959,  0.13039031]])</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="scree-plot" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="scree-plot"><span class="header-section-number">5.4</span> Scree Plot</h2>
+<p>The choice of how many components to keep is not an easy one. There are several shortcut criteria, but they often yield different recommendations. For example, one would suggest to keep all the components until the explained variance is 95% of the original. In our example, that would mean keeping seven or eight components (out of ten, depending on how the criterion is imposed), which is not exactly dimension reduction.</p>
+<p>The Kaiser criterion suggests keeping the principal components with eigenvalues larger than one. This would yield three components, a more reasonable reduction.</p>
+<p>A graphical method to assess the number of components is the so-called <em>scree plot</em>, a plot of explained variance against the number of components. The goal is to identify a <em>kink</em> in this plot, which then suggests the proper number of components. In practice, this is not as easy as it sounds, as the example below illustrates.</p>
+<p>We implement a scree plot by means of a simple matplotlib line plot with the explained variance ratio (<code>explained_variance_ratio_</code>) on the vertical axis and a simple counter on the horizontal axis. As the graph shows, it is not easy at all to identify the <em>kink</em>.</p>
+<div id="cell-fig-pca-screeplot" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Screeplot of variance</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>plt.plot(<span class="bu">range</span>(<span class="dv">1</span>, <span class="bu">len</span>(pca_res.explained_variance_ratio_) <span class="op">+</span> <span class="dv">1</span>), </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>              pca_res.explained_variance_ratio_, marker<span class="op">=</span> <span class="st">'o'</span> , </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>              linestyle <span class="op">=</span> <span class="st">'-'</span>)</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Principal Component'</span>)</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Explained Variance Ratio'</span>)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>plt.xticks(np.arange(<span class="dv">1</span>, <span class="bu">len</span>(pca_res.explained_variance_ratio_) <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-pca-screeplot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pca-screeplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="PCA_files/figure-html/fig-pca-screeplot-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pca-screeplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: Scree plot
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="visualizing-principal-components" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="visualizing-principal-components"><span class="header-section-number">5.5</span> Visualizing Principal Components</h2>
+<section id="biplot" class="level3" data-number="5.5.1">
+<h3 data-number="5.5.1" class="anchored" data-anchor-id="biplot"><span class="header-section-number">5.5.1</span> Biplot</h3>
+<p>A classic visualization of the relative contribution of the original variables to the principal components is a so-called <em>biplot</em>. For any pair of components, it consists of a scatter plot of the component values, with superimposed line plots that show the relative contribution of each variable to each of the components.</p>
+<p>For example, a line plot that points to the upper-right quadrant in the scatter plot (e.g., <code>LLP_13</code>) would indicate that the variable in question contributes positively to both components (note that the results may yield different signs for the loadings, depending on the method used). On the other hand, a line plot that points to the upper-left quadrant (e.g., <code>CAPRAT13</code>) would suggest a negative contribution to the first component, but a positive contribution to the second (on the y-axis).</p>
+<p>We illustrate the biplot by means of a simple function using a number of basic matplotlib plotting operations. The first two principal components are contained in the first two columns of the <code>pcomps</code> array constructed in <a href="#sec-princomp" class="quarto-xref"><span>Section 5.3.2</span></a>.</p>
+<p>In the biplot below, we have re-scaled the loadings by multiplying them by 4 just so they get more visible in the graph.</p>
+<div id="cell-fig-pca-biplot" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Biplot</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> biplot(score, coeff, labels <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">6</span>))</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    plt.scatter(score[:, <span class="dv">0</span>], score[:, <span class="dv">1</span>], alpha <span class="op">=</span> <span class="fl">0.5</span>, s<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(coeff)):</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        plt.arrow(<span class="dv">0</span>, <span class="dv">0</span>, coeff[i, <span class="dv">0</span>], coeff[i, <span class="dv">1</span>], color <span class="op">=</span> <span class="st">'r'</span>, alpha <span class="op">=</span> <span class="fl">0.5</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> labels <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>            plt.text(coeff[i, <span class="dv">0</span>]<span class="op">*</span><span class="fl">1.15</span>, coeff[i, <span class="dv">1</span>]<span class="op">*</span><span class="fl">1.15</span>, <span class="st">"Var"</span> <span class="op">+</span> <span class="bu">str</span>(i<span class="op">+</span><span class="dv">1</span>), </span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>                     color <span class="op">=</span> <span class="st">'black'</span>, ha <span class="op">=</span> <span class="st">'center'</span>, va <span class="op">=</span> <span class="st">'center'</span>)</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>            plt.text(coeff[i, <span class="dv">0</span>]<span class="op">*</span><span class="fl">1.15</span>, coeff[i, <span class="dv">1</span>]<span class="op">*</span><span class="fl">1.15</span>, labels[i], </span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>                     color <span class="op">=</span> <span class="st">'black'</span>, ha <span class="op">=</span> <span class="st">'center'</span>, va <span class="op">=</span> <span class="st">'center'</span>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"PC1"</span>)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"PC2"</span>)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    plt.grid()</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>biplot(pcomps[:, :<span class="dv">2</span>], pca_res.components_.T<span class="op">*</span><span class="dv">4</span>, </span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>       labels <span class="op">=</span> data_pca.columns)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-pca-biplot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pca-biplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="PCA_files/figure-html/fig-pca-biplot-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pca-biplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.2: Biplot
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Other visualizations, such as the ones illustrated in the <em>GeoDa Cluster Book</em> can be pursued as well, including a parallel coordinate plot showing the contributions of different variables to a component. This is not further pursued here.</p>
+</section>
+</section>
+<section id="spatializing-the-pca" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="spatializing-the-pca"><span class="header-section-number">5.6</span> Spatializing the PCA</h2>
+<p>As described in the <em>GeoDa Cluster Book</em>, there are several ways in which the spatial characteristics of the results of a principal components calculation can be visualized. The basic idea is that a component (typically the first or second principal component) summarizes several underlying variables and therefore can be used as a proxy for multivariate relationships. In essence then, a univariate spatial visualization of a principal component provides insight into <em>multivariate spatial patterns</em>.</p>
+<p>All the usual visualizations can be applied, such as various thematic maps and cluster maps based on indicators of local spatial autocorrelation. Care must be taken in interpreting these results, since the sign of the loadings is indeterminate (so high can become low and vice versa). In addition, one can assess the similarity in results of a full multivariate approach, such as a multivariate local Geary or a neighbor match map and the univariate results for the principal component. This is not further pursued here (for extensive examples, see Chapter 2 of the <em>GeoDa Cluster Book</em>).</p>
+<p>We close the overview with an illustration of a Box Map and a Local Moran cluster map for the first principal component.</p>
+<p>The strongest loadings (absolute values &gt; 0.3) in PC1 are:</p>
+<pre><code>Negative:
+    CAPRAT13 (-0.42) → Capital adequacy
+    EQLN_13 (-0.44) → Equity over loans
+    SERV_13 (-0.36) → Net interest income over revenues
+Positive:
+    LLP_13 (0.33) → Loan loss provisions
+    INTR_13 (0.45) → Interest expenses</code></pre>
+<p>Therefore, PC1 contrasts capital adequacy and profitability (negative loadings on CAPRAT13, EQLN_13, and SERV_13) with credit risk and funding costs (positive loadings on LLP_13 and INTR_13). Low PC1 values represent banks with higher capital adequacy, more equity, and stronger deposit bases. High PC1 values represent banks with higher credit risk, loan loss provisions, and funding costs, indicating capital inadequacy and financial strain. As a result, an appropriate label for PC1 could be “Credit Risk &amp; Funding Costs vs.&nbsp;Capital Adequacy”. Remember that the signs of the loadings may be inverted. The interpretation — and therefore the labelling of the coefficients — must be adjusted accordingly, depending on the signs of the loadings.</p>
+<section id="box-map" class="level3" data-number="5.6.1">
+<h3 data-number="5.6.1" class="anchored" data-anchor-id="box-map"><span class="header-section-number">5.6.1</span> Box Map</h3>
+<p>The first component is the first column of the array <code>pcomps</code>. It is added to our GeoDataFrame <code>dfs</code> so that the <code>plot</code> function can be applied. We use the by now familiar options from <a href="Creating_maps.html" class="quarto-xref">Chapter&nbsp;<span>2</span></a>.</p>
+<div id="cell-fig-pca-boxplot" class="cell" data-execution_count="18">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Box map of Component 1:</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>dfs[<span class="st">'Comp.1'</span>] <span class="op">=</span> pcomps[:, <span class="dv">0</span>] </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> dfs.plot(</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    column <span class="op">=</span> <span class="st">'Comp.1'</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    scheme <span class="op">=</span> <span class="st">'BoxPlot'</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    cmap <span class="op">=</span> <span class="st">'RdBu_r'</span>, </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    linewidth <span class="op">=</span> <span class="fl">0.5</span>, </span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    edgecolor <span class="op">=</span> <span class="st">'0.8'</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    legend <span class="op">=</span> <span class="va">True</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    legend_kwds <span class="op">=</span> {<span class="st">"loc"</span>: <span class="st">"center left"</span>, <span class="st">"bbox_to_anchor"</span>: (<span class="dv">1</span>,<span class="fl">0.5</span>), </span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>               <span class="st">"title"</span>: <span class="st">"Component 1"</span>, <span class="st">"fontsize"</span>:<span class="dv">8</span>}    </span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>ax.set_axis_off()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-pca-boxplot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pca-boxplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="PCA_files/figure-html/fig-pca-boxplot-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pca-boxplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: Box plot of first principal component
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="local-moran-cluster-map" class="level3" data-number="5.6.2">
+<h3 data-number="5.6.2" class="anchored" data-anchor-id="local-moran-cluster-map"><span class="header-section-number">5.6.2</span> Local Moran Cluster Map</h3>
+<p>We use <code>pygeoda</code> to compute the Local Moran statistic. This requires three steps:</p>
+<ul>
+<li><code>open</code> the GeoDataFrame and turn it into a <code>pygeoda</code> data object</li>
+<li>create <code>queen_weights</code> from the geoda data object</li>
+<li>compute a <code>local_moran</code> object by passing the weights and the variable
+<ul>
+<li>optional arguments are <code>permutations</code> for the number of permutations (default is 999), <code>seed</code> for the random seed (default is 1234567), and <code>significance_cutoff</code> for the p-value that determines significance (default is 0.05)</li>
+</ul></li>
+</ul>
+<p>In our illustration, we use the first principal component with 9999 permutations and a p-value cut-off of 0.01.</p>
+<p>The resulting <code>lisa object</code> contains the statistics, <code>lisa_values</code>, associated p-values, <code>lisa_pvalues</code>, the neighbor cardinality, <code>lisa_num_nbrs</code>, the cluster classification, based on the specified p-value, <code>lisa_clusters</code>, labels, <code>lisa_labels</code>, and associated colors, <code>lisa_colors</code>.</p>
+<div id="244ead96" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>dfs_g <span class="op">=</span> pygeoda.<span class="bu">open</span>(dfs)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>queen_w <span class="op">=</span> pygeoda.queen_weights(dfs_g)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>lm <span class="op">=</span> pygeoda.local_moran(queen_w, dfs_g[<span class="st">'Comp.1'</span>], </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                         permutations <span class="op">=</span> <span class="dv">9999</span>, seed <span class="op">=</span> <span class="dv">1234567</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>                         significance_cutoff <span class="op">=</span> <span class="fl">0.01</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>lm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>lisa object:
+
+    lisa_values(): [0.005296951235279905, -0.3184600483378756, 0.36298009350110183, 1.109043986529309, 1.1710899759593107, 1.056924984131107, -1.3445446406378438, 0.055015911773549774, -0.1488976211105254, 0.2916115206147433, ...]
+    lisa_pvalues(): [0.4801, 0.1814, 0.0859, 0.019, 0.0077, 0.0422, 0.0716, 0.0966, 0.021, 0.2121, ...]
+    lisa_num_nbrs(): [6, 4, 10, 5, 6, 6, 5, 8, 5, 5, ...]
+    lisa_clusters(): [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, ...]
+    lisa_labels(): ('Not significant', 'High-High', 'Low-Low', 'Low-High', 'High-Low', 'Undefined', 'Isolated')
+    lisa_colors(): ('#eeeeee', '#FF0000', '#0000FF', '#a7adf9', '#f4ada8', '#464646', '#999999')</code></pre>
+</div>
+</div>
+<p>Note that this listing is actually a bit misleading, since all methods except <code>lisa_pvalues()</code> return <em>tuples</em>, not <em>lists</em>. In practice, this doesn’t matter much, since they are typically converted to numpy arrays or pandas series anyway.</p>
+<p>In addition, there are two functions to obtain the Bonferroni bound p cut-off and the False Discovery Rate (FDR) p-value, respectively as <code>lm.lisa_bo(pvalue)</code> and <code>lm.lisa_fdr(pvalue)</code>, where p-value is typically 0.05. Note that smaller values may not yield a feasible cut-off given the maximum number of permutations. However, in contrast to what is the case for desktop <code>GeoDa</code>, the <code>pygeoda</code> implementation allows any value for the number of permutations.</p>
+<p>We illustrate this for a target p-value of 0.05.</p>
+<div id="c0e15a87" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Bonferroni bound:"</span>, np.<span class="bu">round</span>(lm.lisa_bo(<span class="fl">0.05</span>), <span class="dv">6</span>))</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"FDR:"</span>, np.<span class="bu">round</span>(lm.lisa_fdr(<span class="fl">0.05</span>), <span class="dv">6</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Bonferroni bound: 0.000192
+FDR: 0.009962</code></pre>
+</div>
+</div>
+<p>With the usual commands, we create a custom local cluster map using the <code>lisa_colors</code> and <code>lisa_labels</code>.</p>
+<div id="cell-fig-pca-localmoran" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize <span class="op">=</span> (<span class="dv">8</span>,<span class="dv">8</span>))</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>lisa_colors <span class="op">=</span> lm.lisa_colors()</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>lisa_labels <span class="op">=</span> lm.lisa_labels()</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>dfs[<span class="st">'LISA'</span>] <span class="op">=</span> lm.lisa_clusters()</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> ctype, data <span class="kw">in</span> dfs.groupby(<span class="st">'LISA'</span>):</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    color <span class="op">=</span> lisa_colors[ctype]</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    lbl <span class="op">=</span> lisa_labels[ctype]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    data.plot(color <span class="op">=</span> color,</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>        ax <span class="op">=</span> ax,</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>        label <span class="op">=</span> lbl,</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>        edgecolor <span class="op">=</span> <span class="st">'black'</span>,</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>        linewidth <span class="op">=</span> <span class="fl">0.2</span>)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Place legend in the lower left hand corner of the plot</span></span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>lisa_legend <span class="op">=</span> [pltlines.Line2D([<span class="dv">0</span>], [<span class="dv">0</span>], </span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>                color <span class="op">=</span> color, lw <span class="op">=</span> <span class="dv">2</span>) <span class="cf">for</span> color <span class="kw">in</span> lisa_colors]</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>ax.legend(lisa_legend, lisa_labels, loc <span class="op">=</span> <span class="st">'lower left'</span>, </span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>          fontsize <span class="op">=</span> <span class="dv">8</span>, frameon <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>ax.set_axis_off()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div id="fig-pca-localmoran" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pca-localmoran-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="PCA_files/figure-html/fig-pca-localmoran-output-1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pca-localmoran-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.4: Local Moran map for first principal component
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="practice" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="practice"><span class="header-section-number">5.7</span> Practice</h2>
+<p>Use a different set of variables from the <strong>italy_banks</strong> data set (or any other sample data set) to compute a set of principal components. Assess the extent to which true dimension reduction is achieved. Experiment with different spatial and non-spatial visualization techniques.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./Density_cluster.html" class="pagination-link" aria-label="Density Based Clustering">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Density Based Clustering</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./MDS.html" class="pagination-link" aria-label="Distance Preserving Methods">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Distance Preserving Methods</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>Copyright 2025 GeoDa Press LLC, All Rights Reserved</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
